@@ -1,1334 +1,1261 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAMVAULT - Professional Trading Terminal</title>
+    <title>GRAMVAULT - Trading Terminal</title>
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+```
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+        background: #000;
+        color: #fff;
+        font-family: 'Orbitron', monospace;
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .scan-line {
+        position: fixed;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        animation: scan 4s linear infinite;
+        z-index: 1;
+        pointer-events: none;
+    }
+    
+    @keyframes scan {
+        0% { top: -2px; }
+        100% { top: 100%; }
+    }
+    
+    .container { 
+        max-width: 1400px; 
+        margin: 0 auto; 
+        padding: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Holographic Effects */
+    .holo {
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(255, 255, 255, 0.1) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 
+            0 0 20px rgba(255, 255, 255, 0.1),
+            inset 0 0 20px rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .holo::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 70%
+        );
+        animation: holoShine 3s linear infinite;
+    }
+    
+    @keyframes holoShine {
+        0% { transform: rotate(0deg) translate(-50%, -50%); }
+        100% { transform: rotate(360deg) translate(-50%, -50%); }
+    }
+    
+    .holo-text {
+        text-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(255, 255, 255, 0.6),
+            0 0 30px rgba(255, 255, 255, 0.4),
+            0 0 40px rgba(255, 255, 255, 0.2);
+        animation: textGlow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes textGlow {
+        from { 
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.8),
+                0 0 20px rgba(255, 255, 255, 0.6),
+                0 0 30px rgba(255, 255, 255, 0.4);
         }
-
-        body { 
-            background: #0a0a0a; 
-            color: #ffffff; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-            letter-spacing: 0.3px;
+        to { 
+            text-shadow: 
+                0 0 20px rgba(255, 255, 255, 1),
+                0 0 30px rgba(255, 255, 255, 0.8),
+                0 0 40px rgba(255, 255, 255, 0.6),
+                0 0 50px rgba(255, 255, 255, 0.4);
         }
-
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 2rem; 
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-40px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.05); }
-            50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 0 40px rgba(255, 255, 255, 0.1); }
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-
-        @keyframes slideUpModal {
-            from { opacity: 0; transform: translateY(50px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .animate-in { animation: fadeIn 0.6s ease-out; }
-        .animate-slide { animation: slideInLeft 0.6s ease-out; }
-
-        /* ===== LOADING SCREEN ===== */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .loading-spinner {
-            width: 70px;
-            height: 70px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 2rem;
-        }
-
-        .loading-text {
-            font-size: 1.5rem;
-            color: #ffffff;
-            animation: pulse 1.5s ease-in-out infinite;
-            font-weight: 600;
-            letter-spacing: 2px;
-        }
-
-        .loading-subtext {
-            font-size: 0.95rem;
-            color: #808080;
-            margin-top: 0.75rem;
-            font-weight: 400;
-        }
-
-        .loading-bar {
-            width: 240px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 1px;
-            overflow: hidden;
-            margin-top: 2rem;
-        }
-
-        .loading-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ffffff, #e0e0e0, #ffffff);
-            background-size: 200% 100%;
-            animation: shimmer 1.8s infinite;
-        }
-
-        /* ===== LOGIN PAGE ===== */
-        .login-wrapper { 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 1rem; 
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .login-box { 
-            width: 100%; 
-            max-width: 420px; 
-            animation: fadeIn 0.8s ease-out;
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-title { 
-            font-size: 3.5rem; 
-            font-weight: 700; 
-            color: #ffffff; 
-            text-align: center; 
-            margin-bottom: 0.5rem;
-            letter-spacing: -1px;
-            animation: glow 3s ease-in-out infinite;
-        }
-
-        .login-subtitle { 
-            color: #606060; 
-            font-size: 0.9rem; 
-            text-align: center; 
-            margin-bottom: 2.5rem;
-            font-weight: 400;
-            letter-spacing: 1px;
-        }
-
-        .login-form { 
-            background: rgba(20, 20, 20, 0.8); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 12px; 
-            padding: 2.5rem;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-        }
-
-        .form-group { 
-            margin-bottom: 1.75rem; 
-        }
-
-        .form-label { 
-            display: block; 
-            color: #ffffff; 
-            font-size: 0.85rem; 
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-        }
-
-        .form-input { 
-            width: 100%; 
-            background: rgba(255, 255, 255, 0.05); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            color: #ffffff; 
-            padding: 1rem 1.25rem; 
-            border-radius: 8px; 
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(5px);
-        }
-
-        .form-input:focus { 
-            outline: none; 
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .form-input::placeholder { 
-            color: #505050; 
-        }
-
-        .error-box { 
-            background: rgba(239, 68, 68, 0.15); 
-            border: 1px solid rgba(239, 68, 68, 0.3); 
-            color: #ff6b6b; 
-            padding: 1rem 1.25rem; 
-            border-radius: 8px; 
-            font-size: 0.9rem; 
-            margin-bottom: 1.75rem;
-            animation: slideUpModal 0.3s ease-out;
-            font-weight: 500;
-        }
-
-        .btn-login { 
-            width: 100%; 
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            color: #000000; 
-            font-weight: 700; 
-            padding: 1.1rem; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
-        }
-
-        .btn-login:hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-login:active { 
-            transform: translateY(-1px);
-        }
-
-        .system-status { 
-            text-align: center; 
-            margin-top: 2rem; 
-            color: #505050; 
-            font-size: 0.8rem;
-            font-weight: 500;
-            letter-spacing: 0.8px;
-        }
-
-        .system-status p {
-            margin: 0.4rem 0;
-        }
-
-        /* ===== DASHBOARD ===== */
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes flicker {
+        0%, 100% { opacity: 1; }
+        41%, 43% { opacity: 0.8; }
+        45%, 47% { opacity: 0.9; }
+    }
+    
+    .animate-in { animation: fadeIn 0.8s ease-out; }
+    .animate-slide { animation: slideIn 0.8s ease-out; }
+    
+    /* Loading Screen */
+    .loading-screen {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    
+    .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        margin-bottom: 2rem;
+    }
+    
+    .loading-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 4px;
+        animation: flicker 3s infinite;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+    
+    .loading-subtext {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 1rem;
+        letter-spacing: 2px;
+    }
+    
+    .loading-bar {
+        width: 300px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        margin-top: 2rem;
+        border-radius: 2px;
+    }
+    
+    .loading-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, transparent, #fff, transparent);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+    
+    /* Login Page */
+    .login-wrapper { 
+        min-height: 100vh; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        padding: 2rem;
+    }
+    
+    .login-box { 
+        width: 100%; 
+        max-width: 500px; 
+        animation: fadeIn 1s ease-out;
+    }
+    
+    .login-title { 
+        font-size: 4rem; 
+        font-weight: 900; 
+        text-align: center; 
+        margin-bottom: 1rem;
+        letter-spacing: 8px;
+        animation: textGlow 2s ease-in-out infinite alternate;
+    }
+    
+    .login-subtitle { 
+        color: rgba(255, 255, 255, 0.6); 
+        font-size: 0.875rem; 
+        text-align: center; 
+        margin-bottom: 3rem;
+        letter-spacing: 3px;
+        font-weight: 300;
+    }
+    
+    .login-form { 
+        padding: 3rem;
+        border-radius: 1rem;
+        backdrop-filter: blur(20px);
+    }
+    
+    .form-group { margin-bottom: 2rem; }
+    
+    .form-label { 
+        display: block; 
+        font-size: 0.75rem; 
+        margin-bottom: 0.75rem;
+        letter-spacing: 3px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .form-input { 
+        width: 100%; 
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #fff; 
+        padding: 1rem 1.5rem; 
+        border-radius: 0.5rem; 
+        font-family: 'Orbitron', monospace;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        letter-spacing: 2px;
+        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+    
+    .form-input:focus { 
+        outline: none; 
+        border-color: #fff;
+        box-shadow: 
+            0 0 20px rgba(255, 255, 255, 0.3),
+            inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    
+    .form-input::placeholder { 
+        color: rgba(255, 255, 255, 0.3);
+        letter-spacing: 1px;
+    }
+    
+    .error-box { 
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #fff;
+        padding: 1rem 1.5rem; 
+        border-radius: 0.5rem; 
+        font-size: 0.875rem; 
+        margin-bottom: 2rem;
+        animation: slideUp 0.3s ease-out;
+        letter-spacing: 1px;
+    }
+    
+    .btn-login { 
+        width: 100%; 
+        background: #fff;
+        color: #000; 
+        font-weight: 800; 
+        padding: 1.25rem; 
+        border: none; 
+        border-radius: 0.5rem; 
+        cursor: pointer; 
+        font-family: 'Orbitron', monospace;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-login:hover { 
+        transform: translateY(-3px);
+        box-shadow: 0 10px 40px rgba(255, 255, 255, 0.6);
+    }
+    
+    .btn-login:active { 
+        transform: translateY(0);
+    }
+    
+    .system-status { 
+        text-align: center; 
+        margin-top: 2rem; 
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+    }
+    
+    /* Dashboard */
+    .header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 3rem; 
+        padding-bottom: 1.5rem; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .header-title { 
+        font-size: 2.5rem; 
+        font-weight: 900;
+        letter-spacing: 6px;
+        animation: textGlow 2s ease-in-out infinite alternate;
+    }
+    
+    .header-subtitle { 
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+        margin-top: 0.5rem;
+    }
+    
+    .user-info { 
+        text-align: right; 
+        font-size: 0.875rem; 
+        color: rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .btn-withdraw {
+        background: #fff;
+        color: #000;
+        font-weight: 800;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-family: 'Orbitron', monospace;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        font-size: 0.875rem;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    }
+    
+    .btn-withdraw:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.6);
+    }
+    
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+        gap: 1.5rem; 
+        margin-bottom: 3rem; 
+    }
+    
+    .stat-card { 
+        padding: 2rem;
+        border-radius: 1rem;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(20px);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 
+            0 0 40px rgba(255, 255, 255, 0.3),
+            inset 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 1.5rem; 
+    }
+    
+    .stat-label { 
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+        opacity: 0.7;
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    }
+    
+    .stat-value { 
+        font-size: 2rem; 
+        font-weight: 900;
+        letter-spacing: 2px;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    }
+    
+    .stat-sub { 
+        font-size: 0.75rem;
+        margin-top: 0.75rem;
+        opacity: 0.6;
+        letter-spacing: 1px;
+    }
+    
+    .progress-card { 
+        padding: 2rem;
+        border-radius: 1rem;
+        margin-bottom: 3rem;
+        backdrop-filter: blur(20px);
+    }
+    
+    .progress-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 1.5rem; 
+        font-size: 0.875rem;
+        letter-spacing: 2px;
+    }
+    
+    .progress-bar-bg { 
+        width: 100%; 
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 9999px; 
+        height: 1.5rem; 
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .progress-bar-fill { 
+        background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.6), #fff);
+        height: 1.5rem; 
+        border-radius: 9999px; 
+        transition: width 1s ease;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        animation: shimmer 3s infinite;
+        background-size: 200% 100%;
+    }
+    
+    .progress-footer { 
+        display: flex; 
+        justify-content: space-between; 
+        font-size: 0.875rem;
+        letter-spacing: 1px;
+    }
+    
+    .chart-card { 
+        padding: 2rem;
+        border-radius: 1rem;
+        margin-bottom: 3rem;
+        backdrop-filter: blur(20px);
+    }
+    
+    .chart-title { 
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        font-weight: 700;
+    }
+    
+    .transactions-card { 
+        padding: 2rem;
+        border-radius: 1rem;
+        backdrop-filter: blur(20px);
+    }
+    
+    .tx-item { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 0.75rem; 
+        padding: 1.25rem; 
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .tx-item:hover { 
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateX(8px);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    
+    .tx-left { display: flex; align-items: center; gap: 1rem; }
+    .tx-icon { 
+        width: 1.5rem; 
+        height: 1.5rem;
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    }
+    .tx-pair { 
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .tx-time { 
+        font-size: 0.75rem;
+        opacity: 0.6;
+        letter-spacing: 1px;
+        margin-top: 0.25rem;
+    }
+    .tx-right { text-align: right; }
+    .tx-amount { 
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .tx-type { 
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        opacity: 0.6;
+        letter-spacing: 1px;
+        margin-top: 0.25rem;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+        padding: 3rem;
+        max-width: 600px;
+        width: 100%;
+        animation: slideUp 0.4s ease-out;
+        border-radius: 1rem;
+        backdrop-filter: blur(20px);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .modal-title {
+        font-size: 1.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 300;
+    }
+    
+    .modal-close:hover { 
+        color: #fff;
+        transform: rotate(90deg);
+    }
+    
+    .modal-form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .modal-label {
+        display: block;
+        font-size: 0.75rem;
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+    }
+    
+    .modal-input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        font-family: 'Orbitron', monospace;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        letter-spacing: 1px;
+    }
+    
+    .modal-input:focus {
+        outline: none;
+        border-color: #fff;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    
+    .modal-btn {
+        width: 100%;
+        background: #fff;
+        color: #000;
+        font-weight: 800;
+        padding: 1.25rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-family: 'Orbitron', monospace;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    }
+    
+    .modal-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 40px rgba(255, 255, 255, 0.7);
+    }
+    
+    .alert-box {
+        padding: 3rem;
+        max-width: 600px;
+        width: 100%;
+        animation: slideUp 0.4s ease-out;
+        text-align: center;
+        border-radius: 1rem;
+        backdrop-filter: blur(20px);
+    }
+    
+    .alert-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+        animation: pulse 2s infinite;
+    }
+    
+    .alert-title {
+        font-size: 1.75rem;
+        font-weight: 900;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    }
+    
+    .alert-message {
+        opacity: 0.8;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+    
+    .alert-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #fff;
+        font-weight: 700;
+        padding: 1rem 3rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-family: 'Orbitron', monospace;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+    
+    .alert-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    }
+    
+    canvas { width: 100%; height: 350px; }
+    
+    @media (max-width: 768px) {
+        .stats-grid { grid-template-columns: 1fr; }
         .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 3rem; 
-            padding-bottom: 1.5rem; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08); 
-            animation: slideInLeft 0.6s ease-out;
-        }
-
-        .header-title { 
-            font-size: 2.2rem; 
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .header-subtitle { 
-            color: #808080; 
-            font-size: 0.9rem;
-            font-weight: 400;
-            letter-spacing: 1px;
-        }
-
-        .user-info { 
-            text-align: right; 
-            font-size: 0.9rem; 
-            color: #808080;
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 1.5rem;
-        }
-
-        .user-info > div p {
-            margin: 0.3rem 0;
-        }
-
-        .user-info > div p:first-child {
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        .btn-withdraw {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            color: #000000;
-            font-weight: 700;
-            padding: 0.9rem 1.8rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            font-size: 0.85rem;
-            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
-        }
-
-        .btn-withdraw:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2);
-        }
-
-        /* ===== STATS GRID ===== */
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 1.5rem; 
-            margin-bottom: 2.5rem; 
-        }
-
-        .stat-card { 
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 12px; 
-            padding: 1.75rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.08);
-        }
-
-        .stat-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 1rem; 
-        }
-
-        .stat-label { 
-            color: #808080; 
-            font-size: 0.85rem; 
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .stat-icon {
-            font-size: 1.5rem;
-            opacity: 0.8;
-        }
-
-        .stat-value { 
-            font-size: 2rem; 
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
-            font-family: 'Courier New', monospace;
-        }
-
-        .stat-sub { 
-            color: #606060; 
-            font-size: 0.85rem; 
-            margin-top: 0.75rem;
-            font-weight: 400;
-        }
-
-        /* ===== PROGRESS CARD ===== */
-        .progress-card { 
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 12px; 
-            padding: 2rem; 
-            margin-bottom: 2.5rem;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            animation: slideInUp 0.6s ease-out;
-            animation-delay: 0.3s;
-            animation-fill-mode: both;
-        }
-
-        .progress-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 1.5rem; 
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .progress-bar-bg { 
-            width: 100%; 
-            background: rgba(255, 255, 255, 0.05); 
-            border-radius: 999px; 
-            height: 8px; 
-            margin-bottom: 1.25rem;
-            overflow: hidden;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .progress-bar-fill { 
-            background: linear-gradient(90deg, #ffffff, #e0e0e0, #ffffff); 
-            height: 8px; 
-            border-radius: 999px; 
-            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: shimmer 3s infinite;
-            background-size: 200% 100%;
-            box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
-        }
-
-        .progress-footer { 
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #808080;
-        }
-
-        /* ===== CHART CARD ===== */
-        .chart-card { 
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 12px; 
-            padding: 2rem; 
-            margin-bottom: 2.5rem;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            animation: slideInUp 0.6s ease-out;
-            animation-delay: 0.4s;
-            animation-fill-mode: both;
-        }
-
-        .chart-title { 
-            font-size: 1.1rem; 
-            margin-bottom: 1.5rem; 
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-        }
-
-        /* ===== TRANSACTIONS CARD ===== */
-        .transactions-card { 
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 12px; 
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            animation: slideInUp 0.6s ease-out;
-            animation-delay: 0.5s;
-            animation-fill-mode: both;
-        }
-
-        .tx-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.06); 
-            border-radius: 8px; 
-            padding: 1.25rem; 
-            margin-bottom: 0.75rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .tx-item:hover { 
-            border-color: rgba(255, 255, 255, 0.12);
-            transform: translateX(4px);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .tx-left { 
-            display: flex; 
-            align-items: center; 
-            gap: 1rem; 
-        }
-
-        .tx-icon { 
-            width: 2rem; 
-            height: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-
-        .tx-pair { 
-            font-size: 0.95rem; 
-            font-weight: 700;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-        }
-
-        .tx-time { 
-            color: #606060; 
-            font-size: 0.8rem;
-            font-weight: 400;
-            margin-top: 0.25rem;
-        }
-
-        .tx-right { 
-            text-align: right; 
-        }
-
-        .tx-amount { 
-            font-size: 0.95rem; 
-            font-weight: 700;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-        }
-
-        .tx-type { 
-            color: #606060; 
-            font-size: 0.8rem; 
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.8px;
-            margin-top: 0.25rem;
-        }
-
-        /* ===== MODAL ===== */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 1rem;
-            backdrop-filter: blur(8px);
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 2.5rem;
-            max-width: 520px;
-            width: 100%;
-            animation: slideUpModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: #808080;
-            font-size: 1.8rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-        }
-
-        .modal-close:hover { 
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .modal-form-group {
-            margin-bottom: 1.75rem;
-        }
-
-        .modal-label {
-            display: block;
-            color: #ffffff;
-            font-size: 0.85rem;
-            margin-bottom: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 1.2px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .modal-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-input::placeholder {
-            color: #505050;
-        }
-
-        .modal-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            color: #000000;
-            font-weight: 700;
-            padding: 1.1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2);
-        }
-
-        /* ===== ALERT BOX ===== */
-        .alert-box {
-            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%);
-            border: 1px solid rgba(255, 100, 100, 0.2);
-            border-radius: 16px;
-            padding: 2.5rem;
-            max-width: 520px;
-            width: 100%;
-            animation: slideUpModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
-
-        .alert-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s ease-in-out infinite;
+        .user-info { 
+            text-align: center;
+            flex-direction: column;
         }
+        .login-title { font-size: 2.5rem; }
+        .header-title { font-size: 2rem; }
+    }
+</style>
+```
 
-        .alert-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ff9999;
-            margin-bottom: 1.25rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .alert-message {
-            color: #b0b0b0;
-            line-height: 1.8;
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-            font-weight: 400;
-            font-family: 'Courier New', monospace;
-        }
-
-        .alert-btn {
-            background: rgba(255, 100, 100, 0.15);
-            border: 1px solid rgba(255, 100, 100, 0.3);
-            color: #ff9999;
-            font-weight: 700;
-            padding: 0.95rem 2.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            font-size: 0.85rem;
-        }
-
-        .alert-btn:hover {
-            background: rgba(255, 100, 100, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 100, 100, 0.2);
-        }
-
-        /* ===== COLOR UTILITIES ===== */
-        .green { color: #90ee90; }
-        .red { color: #ff9999; }
-
-        canvas { width: 100%; height: 300px; }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .container { padding: 1.25rem; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .header { flex-direction: column; gap: 1.5rem; text-align: center; }
-            .header-title { font-size: 1.8rem; }
-            .user-info { text-align: center; flex-direction: column; width: 100%; }
-            .btn-withdraw { width: 100%; }
-            .login-title { font-size: 2.8rem; }
-            .modal-content { max-width: 90vw; padding: 1.75rem; }
-            .stat-value { font-size: 1.5rem; }
-        }
-    </style>
 </head>
 <body>
+    <div class="scan-line"></div>
     <div id="app"></div>
 
-    <script>
-        // ===== SESSION MANAGEMENT - PERSISTS ON REFRESH =====
-        class SessionManager {
-            constructor() {
-                this.storageKey = 'gramvault_session';
-                this.loginTimestampKey = 'gramvault_login_time';
-            }
+```
+<script>
+    let isLoggedIn = false;
+    let isLoading = false;
+    let dashboardData = null;
+    let showWithdrawModal = false;
+    let showAlert = false;
+    let withdrawProcessing = false;
 
-            // Save session to localStorage
-            saveSession() {
-                const session = {
-                    isLoggedIn: true,
-                    username: 'groovy9944',
-                    loginTime: loginTimestamp.getTime()
-                };
-                localStorage.setItem(this.storageKey, JSON.stringify(session));
-            }
+    const INITIAL_BALANCE = 36;
+    const TARGET_BALANCE = 76;
 
-            // Get session from localStorage
-            getSession() {
-                const session = localStorage.getItem(this.storageKey);
-                return session ? JSON.parse(session) : null;
-            }
-
-            // Clear session
-            clearSession() {
-                localStorage.removeItem(this.storageKey);
-            }
-
-            // Check if user is still logged in
-            isSessionValid() {
-                const session = this.getSession();
-                return session && session.isLoggedIn === true;
-            }
-        }
-
-        const sessionManager = new SessionManager();
-
-        // ===== APPLICATION STATE =====
-        let isLoggedIn = false;
-        let isLoading = false;
-        let dashboardData = null;
-        let showWithdrawModal = false;
-        let showAlert = false;
-        let withdrawProcessing = false;
-        let loginTimestamp = null;
-        let updateInterval = null;
-
-        // Portfolio constants
-        const INITIAL_BALANCE = 30;
-        const CURRENT_BALANCE = 43.8;
-        const TARGET_BALANCE = 100;
-        const PROFIT_GOAL = 40;
-        const CURRENT_USER = 'groovy9944';
-        const CURRENT_DATE = '2026-01-04';
-
-        /**
-         * LIVE PROFIT CALCULATION - REAL-TIME NOT LOOPING
-         */
-        function calculateLiveProfit() {
-            const now = new Date();
-            const timeSinceLogin = now - loginTimestamp;
-            const minutesSinceLogin = timeSinceLogin / (1000 * 60);
-
-            const profitPerDay = PROFIT_GOAL / 12;
-            const profitPerMinute = profitPerDay / (24 * 60);
-
-            const baseProfit = profitPerMinute * minutesSinceLogin;
+    function generateDashboardData() {
+        const now = Date.now();
+        const startDate = new Date('2025-01-01T00:00:00Z').getTime();
+        const minutesPassed = Math.floor((now - startDate) / (1000 * 60));
+        
+        const baseProfit = minutesPassed * 0.00231;
+        const volatility1 = Math.sin(minutesPassed / 120) * 0.3;
+        const volatility2 = Math.sin(minutesPassed / 47) * 0.15;
+        const volatility3 = Math.sin(minutesPassed / 89) * 0.08;
+        
+        const totalProfit = baseProfit + volatility1 + volatility2 + volatility3;
+        const currentBalance = INITIAL_BALANCE + totalProfit;
+        
+        const chartData = [];
+        for (let i = 24; i >= 0; i--) {
+            const timeOffset = i * 60;
+            const pastMinutes = minutesPassed - timeOffset;
+            const pastProfit = pastMinutes * 0.00231;
+            const pastVol1 = Math.sin(pastMinutes / 120) * 0.3;
+            const pastVol2 = Math.sin(pastMinutes / 47) * 0.15;
+            const pastVol3 = Math.sin(pastMinutes / 89) * 0.08;
+            const pastBalance = INITIAL_BALANCE + pastProfit + pastVol1 + pastVol2 + pastVol3;
             
-            const volatility = Math.sin(minutesSinceLogin / 100) * 0.5 + 
-                              Math.sin(minutesSinceLogin / 200) * 0.3 +
-                              Math.sin(minutesSinceLogin / 500) * 0.2;
-
-            const totalProfit = baseProfit + volatility;
-            const currentBalance = INITIAL_BALANCE + totalProfit;
-
-            return {
-                currentBalance: Math.max(INITIAL_BALANCE, currentBalance),
-                totalProfit: Math.max(0, totalProfit),
-                profitPerMinute
-            };
+            chartData.push({
+                time: i === 0 ? 'NOW' : i + 'H',
+                balance: Math.max(INITIAL_BALANCE, pastBalance)
+            });
         }
-
-        function generateDashboardData() {
-            const profitData = calculateLiveProfit();
-            const now = new Date();
-            const minutesSinceLogin = (now - loginTimestamp) / (1000 * 60);
-
-            // Chart data
-            const chartData = [];
-            for (let i = 24; i >= 0; i--) {
-                const minutesAgo = (i * 60);
-                const pastMinutes = minutesSinceLogin - minutesAgo;
-                
-                if (pastMinutes < 0) {
-                    chartData.push({
-                        time: i === 0 ? 'Now' : i + 'h ago',
-                        balance: INITIAL_BALANCE
-                    });
-                } else {
-                    const volatility = Math.sin(pastMinutes / 100) * 0.5 + 
-                                      Math.sin(pastMinutes / 200) * 0.3 +
-                                      Math.sin(pastMinutes / 500) * 0.2;
-                    const baseProfit = profitData.profitPerMinute * pastMinutes;
-                    const balance = INITIAL_BALANCE + baseProfit + volatility;
-                    chartData.push({
-                        time: i === 0 ? 'Now' : i + 'h ago',
-                        balance: Math.max(INITIAL_BALANCE, balance)
-                    });
-                }
-            }
-
-            // Transactions
-            const transactions = [];
-            const tradeInterval = 15;
-            const numTrades = Math.floor(minutesSinceLogin / tradeInterval);
-
-            for (let i = 0; i < Math.min(numTrades, 20); i++) {
-                const minutesAgo = i * tradeInterval;
-                const tradeTime = loginTimestamp + (minutesSinceLogin - minutesAgo) * 60 * 1000;
-                const date = new Date(tradeTime);
-
-                const isWin = Math.sin(minutesAgo * 0.2) > 0;
-                const amount = 0.2 + Math.abs(Math.sin(minutesAgo * 0.15)) * 0.8;
-                const pairs = ['SOL/USDC', 'SOL/ETH', 'SOL/BTC', 'SOL/USDT'];
-
-                transactions.push({
-                    id: 'TX' + minutesAgo,
-                    type: isWin ? 'win' : 'loss',
-                    pair: pairs[Math.floor(Math.abs(Math.sin(minutesAgo)) * 4)],
-                    amount: isWin ? amount : -amount,
-                    time: date.toLocaleString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    })
-                });
-            }
-
-            // Progress
-            const progressPercent = ((profitData.currentBalance - INITIAL_BALANCE) / (TARGET_BALANCE - INITIAL_BALANCE)) * 100;
-
-            // Today's profit
-            const startOfDay = new Date(now);
-            startOfDay.setHours(0, 0, 0, 0);
-            const minutesToday = (now - startOfDay) / (1000 * 60);
-            const todayProfit = profitData.profitPerMinute * minutesToday;
-
-            return {
-                currentBalance: profitData.currentBalance,
-                totalProfit: profitData.totalProfit,
-                todayProfit: Math.max(0, todayProfit),
-                chartData,
-                transactions,
-                progressPercent: Math.min(progressPercent, 100),
-                winRate: 55 + Math.sin(minutesSinceLogin / 300) * 15
-            };
-        }
-
-        function renderLoading(text = 'AUTHENTICATING', subtext = 'Verifying credentials...') {
-            return `
-                <div class="loading-screen">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">${text}</div>
-                    <div class="loading-subtext">${subtext}</div>
-                    <div class="loading-bar">
-                        <div class="loading-bar-fill"></div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderLogin() {
-            return `
-                <div class="login-wrapper">
-                    <div class="login-box">
-                        <h1 class="login-title">GRAMVAULT</h1>
-                        <p class="login-subtitle">// PROFESSIONAL TRADING PLATFORM</p>
-                        
-                        <div class="login-form">
-                            <div class="form-group">
-                                <label class="form-label">→ Username</label>
-                                <input type="text" id="username" class="form-input" placeholder="Enter username..." autocomplete="off">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">→ Password</label>
-                                <input type="password" id="password" class="form-input" placeholder="Enter password..." autocomplete="off">
-                            </div>
-                            
-                            <div id="error-container"></div>
-                            
-                            <button class="btn-login" onclick="handleLogin()">Access Terminal</button>
-                        </div>
-                        
-                        <div class="system-status">
-                            <p>⚡ SYSTEM STATUS: ONLINE</p>
-                            <p>🔒 SECURE ENCRYPTED CONNECTION</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderWithdrawModal() {
-            return `
-                <div class="modal-overlay">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2 class="modal-title">Withdraw SOL</h2>
-                            <button class="modal-close" onclick="closeWithdrawModal()">×</button>
-                        </div>
-                        
-                        <div class="modal-form-group">
-                            <label class="modal-label">Solana Wallet Address</label>
-                            <input type="text" id="wallet-address" class="modal-input" placeholder="Input your Solana wallet address" autocomplete="off">
-                        </div>
-                        
-                        <div class="modal-form-group">
-                            <label class="modal-label">Amount (SOL)</label>
-                            <input type="number" id="withdraw-amount" class="modal-input" placeholder="Enter amount to withdraw" step="0.01" min="0.01" autocomplete="off">
-                            <p class="stat-sub" style="margin-top: 0.75rem;">Available Balance: <span class="green">${dashboardData.currentBalance.toFixed(4)} SOL</span></p>
-                        </div>
-                        
-                        <button class="modal-btn" onclick="processWithdrawal()">Confirm Withdrawal</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderAlert() {
-            return `
-                <div class="modal-overlay">
-                    <div class="alert-box">
-                        <div class="alert-icon">⚠️</div>
-                        <h2 class="alert-title">Withdrawal Restricted</h2>
-                        <p class="alert-message">
-                            We have detected insufficient balance to process this withdrawal. Your current account requires additional profit accumulation to meet our risk management drawdown protection requirements.
-                            <br><br>
-                            Please allow more trading time for your account to generate additional profits before attempting another withdrawal request.
-                        </p>
-                        <button class="alert-btn" onclick="closeAlert()">Understood</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderDashboard() {
-            const data = dashboardData;
+        
+        const transactions = [];
+        const tradeInterval = 180;
+        const numTrades = Math.floor(minutesPassed / tradeInterval);
+        
+        for (let i = 0; i < Math.min(numTrades, 15); i++) {
+            const tradeTime = minutesPassed - (i * tradeInterval);
+            const isWin = Math.sin(tradeTime * 0.1) > -0.2;
+            const amount = 0.5 + Math.abs(Math.sin(tradeTime * 0.3)) * 2;
+            const date = new Date(now - (i * tradeInterval * 60 * 1000));
             
-            return `
-                <div class="container animate-in">
-                    <div class="header">
+            transactions.push({
+                id: 'TX' + tradeTime,
+                type: isWin ? 'win' : 'loss',
+                pair: ['SOL/USDC', 'SOL/ETH', 'SOL/BTC'][Math.floor(Math.abs(Math.sin(tradeTime)) * 3)],
+                amount: isWin ? amount : -amount,
+                time: date.toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                })
+            });
+        }
+        
+        const daysPassed = minutesPassed / (60 * 24);
+        const progressPercent = Math.min((daysPassed / 12) * 100, 100);
+        
+        const startOfDay = new Date(now);
+        startOfDay.setHours(0, 0, 0, 0);
+        const minutesTodayPassed = Math.floor((now - startOfDay.getTime()) / (1000 * 60));
+        const todayProfit = minutesTodayPassed * 0.00231 + 
+                            Math.sin(minutesPassed / 120) * 0.2 + 
+                            Math.sin(minutesPassed / 47) * 0.1;
+        
+        return {
+            currentBalance,
+            totalProfit,
+            todayProfit,
+            chartData,
+            transactions,
+            progressPercent,
+            daysPassed: daysPassed.toFixed(1),
+            winRate: 68 + Math.sin(minutesPassed / 500) * 5
+        };
+    }
+
+    function renderLoading(text = 'AUTHENTICATING', subtext = 'Verifying credentials...') {
+        return `
+            <div class="loading-screen">
+                <div class="loading-spinner"></div>
+                <div class="loading-text holo-text">${text}</div>
+                <div class="loading-subtext">${subtext}</div>
+                <div class="loading-bar">
+                    <div class="loading-bar-fill"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderLogin() {
+        return `
+            <div class="login-wrapper">
+                <div class="login-box">
+                    <h1 class="login-title holo-text">GRAMVAULT</h1>
+                    <p class="login-subtitle">HOLOGRAPHIC TRADING TERMINAL // VERSION 3.0</p>
+                    
+                    <div class="login-form holo">
+                        <div class="form-group">
+                            <label class="form-label">> USERNAME</label>
+                            <input type="text" id="username" class="form-input" placeholder="ENTER USERNAME" autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">> PASSWORD</label>
+                            <input type="password" id="password" class="form-input" placeholder="ENTER PASSWORD" autocomplete="off">
+                        </div>
+                        
+                        <div id="error-container"></div>
+                        
+                        <button class="btn-login" onclick="handleLogin()">ACCESS TERMINAL</button>
+                    </div>
+                    
+                    <div class="system-status">
+                        <p>⚡ SYSTEM ONLINE // ENCRYPTED</p>
+                        <p style="margin-top: 0.5rem;">🔒 QUANTUM SECURITY ENABLED</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderWithdrawModal() {
+        return `
+            <div class="modal-overlay">
+                <div class="modal-content holo">
+                    <div class="modal-header">
+                        <h2 class="modal-title holo-text">WITHDRAW</h2>
+                        <button class="modal-close" onclick="closeWithdrawModal()">×</button>
+                    </div>
+                    
+                    <div class="modal-form-group">
+                        <label class="modal-label">SOLANA WALLET ADDRESS</label>
+                        <input type="text" id="wallet-address" class="modal-input" placeholder="ENTER SOL WALLET ADDRESS" autocomplete="off">
+                    </div>
+                    
+                    <div class="modal-form-group">
+                        <label class="modal-label">AMOUNT (SOL)</label>
+                        <input type="number" id="withdraw-amount" class="modal-input" placeholder="ENTER AMOUNT" step="0.01" min="0.01" autocomplete="off">
+                        <p class="stat-sub" style="margin-top: 1rem;">AVAILABLE: ${dashboardData.currentBalance.toFixed(4)} SOL</p>
+                    </div>
+                    
+                    <button class="modal-btn" onclick="processWithdrawal()">CONFIRM WITHDRAWAL</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderAlert() {
+        return `
+            <div class="modal-overlay">
+                <div class="alert-box holo">
+                    <div class="alert-icon">⚠</div>
+                    <h2 class="alert-title holo-text">WITHDRAWAL RESTRICTED</h2>
+                    <p class="alert-message">
+                        SYSTEM ALERT: Account balance verification failed. Current funds are insufficient to process withdrawal request due to active drawdown protection protocols.
+                        <br><br>
+                        REQUIREMENT: Additional profit generation required to maintain account stability and comply with risk management parameters.
+                        <br><br>
+                        ACTION REQUIRED: Allow additional time for profitable trading activity until account balance reaches minimum threshold for secure withdrawal execution.
+                    </p>
+                    <button class="alert-btn" onclick="closeAlert()">ACKNOWLEDGED</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderDashboard() {
+        const data = dashboardData;
+        
+        return `
+            <div class="container animate-in">
+                <div class="header">
+                    <div>
+                        <h1 class="header-title holo-text">GRAMVAULT</h1>
+                        <p class="header-subtitle">HOLOGRAPHIC TRADING TERMINAL // v3.0</p>
+                    </div>
+                    <div class="user-info">
                         <div>
-                            <h1 class="header-title">GRAMVAULT</h1>
-                            <p class="header-subtitle">// PROFESSIONAL TRADING DASHBOARD</p>
+                            <p style="font-weight: 700; letter-spacing: 2px;">USER: GROOVY9944</p>
+                            <p style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.25rem;">${new Date().toLocaleString()}</p>
                         </div>
-                        <div class="user-info">
-                            <div>
-                                <p>USER: ${CURRENT_USER}</p>
-                                <p>${CURRENT_DATE}</p>
-                            </div>
-                            <button class="btn-withdraw" onclick="openWithdrawModal()">Withdraw</button>
-                        </div>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-card animate-slide" style="animation-delay: 0.1s;">
-                            <div class="stat-header">
-                                <span class="stat-label">Portfolio Balance</span>
-                                <span class="stat-icon">💼</span>
-                            </div>
-                            <p class="stat-value">${data.currentBalance.toFixed(2)} SOL</p>
-                            <p class="stat-sub">Starting: ${INITIAL_BALANCE} SOL</p>
-                        </div>
-
-                        <div class="stat-card animate-slide" style="animation-delay: 0.15s;">
-                            <div class="stat-header">
-                                <span class="stat-label">Total Profit</span>
-                                <span class="stat-icon">📈</span>
-                            </div>
-                            <p class="stat-value green">+${data.totalProfit.toFixed(2)} SOL</p>
-                            <p class="stat-sub">${((data.totalProfit / INITIAL_BALANCE) * 100).toFixed(1)}% ROI</p>
-                        </div>
-
-                        <div class="stat-card animate-slide" style="animation-delay: 0.2s;">
-                            <div class="stat-header">
-                                <span class="stat-label">Today's P&L</span>
-                                <span class="stat-icon">📊</span>
-                            </div>
-                            <p class="stat-value ${data.todayProfit >= 0 ? 'green' : 'red'}">
-                                ${data.todayProfit >= 0 ? '+' : ''}${data.todayProfit.toFixed(4)} SOL
-                            </p>
-                            <p class="stat-sub">${((data.todayProfit / INITIAL_BALANCE) * 100).toFixed(2)}% Daily</p>
-                        </div>
-
-                        <div class="stat-card animate-slide" style="animation-delay: 0.25s;">
-                            <div class="stat-header">
-                                <span class="stat-label">Win Rate</span>
-                                <span class="stat-icon">🎯</span>
-                            </div>
-                            <p class="stat-value">${data.winRate.toFixed(1)}%</p>
-                            <p class="stat-sub">Live Performance</p>
-                        </div>
-                    </div>
-
-                    <div class="progress-card">
-                        <div class="progress-header">
-                            <span>Growth Progress</span>
-                            <span>${data.progressPercent.toFixed(1)}%</span>
-                        </div>
-                        <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" style="width: ${data.progressPercent}%"></div>
-                        </div>
-                        <div class="progress-footer">
-                            <span>${INITIAL_BALANCE} SOL</span>
-                            <span class="green">${data.currentBalance.toFixed(2)} SOL</span>
-                            <span>${TARGET_BALANCE} SOL</span>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <h2 class="chart-title">Balance Trend (24 Hours)</h2>
-                        <canvas id="chart"></canvas>
-                    </div>
-
-                    <div class="transactions-card">
-                        <h2 class="chart-title">Recent Transactions</h2>
-                        ${data.transactions.length > 0 ? data.transactions.map((tx, i) => `
-                            <div class="tx-item" style="animation: slideInUp 0.6s ease-out; animation-delay: ${0.1 + i * 0.03}s; animation-fill-mode: both;">
-                                <div class="tx-left">
-                                    <span class="tx-icon">${tx.type === 'win' ? '✓' : '✗'}</span>
-                                    <div>
-                                        <p class="tx-pair">${tx.pair}</p>
-                                        <p class="tx-time">${tx.time}</p>
-                                    </div>
-                                </div>
-                                <div class="tx-right">
-                                    <p class="tx-amount ${tx.type === 'win' ? 'green' : 'red'}">
-                                        ${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(4)} SOL
-                                    </p>
-                                    <p class="tx-type">${tx.type}</p>
-                                </div>
-                            </div>
-                        `).join('') : '<p style="text-align: center; color: #606060; padding: 2rem;">No transactions yet</p>'}
+                        <button class="btn-withdraw" onclick="openWithdrawModal()">WITHDRAW</button>
                     </div>
                 </div>
-            `;
-        }
 
-        function drawChart() {
-            const canvas = document.getElementById('chart');
-            if (!canvas || !dashboardData) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width = canvas.offsetWidth;
-            const height = canvas.height = 300;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            const data = dashboardData.chartData;
-            const padding = 40;
-            const chartWidth = width - padding * 2;
-            const chartHeight = height - padding * 2;
-            
-            const values = data.map(d => d.balance);
-            const minVal = Math.min(...values) - 0.5;
-            const maxVal = Math.max(...values) + 0.5;
-            const range = maxVal - minVal;
-            
-            // Grid
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 5; i++) {
-                const y = padding + (chartHeight / 5) * i;
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
-            }
-            
-            // Gradient
-            const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0.02)');
-            
+                <div class="stats-grid">
+                    <div class="stat-card holo animate-slide" style="animation-delay: 0.1s;">
+                        <div class="stat-header">
+                            <span class="stat-label">CURRENT BALANCE</span>
+                            <span class="stat-icon">◈</span>
+                        </div>
+                        <p class="stat-value holo-text">${data.currentBalance.toFixed(4)} SOL</p>
+                        <p class="stat-sub">INITIAL: ${INITIAL_BALANCE.toFixed(4)} SOL</p>
+                    </div>
+
+                    <div class="stat-card holo animate-slide" style="animation-delay: 0.2s;">
+                        <div class="stat-header">
+                            <span class="stat-label">TODAY'S P&L</span>
+                            <span class="stat-icon">${data.todayProfit >= 0 ? '▲' : '▼'}</span>
+                        </div>
+                        <p class="stat-value holo-text">
+                            ${data.todayProfit >= 0 ? '+' : ''}${data.todayProfit.toFixed(4)} SOL
+                        </p>
+                        <p class="stat-sub">${((data.todayProfit / INITIAL_BALANCE) * 100).toFixed(2)}% DAILY</p>
+                    </div>
+
+                    <div class="stat-card holo animate-slide" style="animation-delay: 0.3s;">
+                        <div class="stat-header">
+                            <span class="stat-label">TOTAL PROFIT</span>
+                            <span class="stat-icon">◆</span>
+                        </div>
+                        <p class="stat-value holo-text">+${data.totalProfit.toFixed(4)} SOL</p>
+                        <p class="stat-sub">${((data.totalProfit / INITIAL_BALANCE) * 100).toFixed(2)}% ROI</p>
+                    </div>
+
+                    <div class="stat-card holo animate-slide" style="animation-delay: 0.4s;">
+                        <div class="stat-header">
+                            <span class="stat-label">WIN RATE</span>
+                            <span class="stat-icon">◉</span>
+                        </div>
+                        <p class="stat-value holo-text">${data.winRate.toFixed(1)}%</p>
+                        <p class="stat-sub">LIVE PERFORMANCE</p>
+                    </div>
+                </div>
+
+                <div class="progress-card holo animate-slide" style="animation-delay: 0.5s;">
+                    <div class="progress-header">
+                        <span>◈ 12-DAY GOAL PROGRESS</span>
+                        <span style="opacity: 0.7;">DAY ${data.daysPassed} / 12</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${data.progressPercent}%"></div>
+                    </div>
+                    <div class="progress-footer">
+                        <span>START: ${INITIAL_BALANCE} SOL</span>
+                        <span class="holo-text" style="font-weight: 700;">CURRENT: ${data.currentBalance.toFixed(2)} SOL</span>
+                        <span>TARGET: ${TARGET_BALANCE} SOL</span>
+                    </div>
+                </div>
+
+                <div class="chart-card holo animate-slide" style="animation-delay: 0.6s;">
+                    <h2 class="chart-title">> BALANCE TRAJECTORY (24H)</h2>
+                    <canvas id="chart"></canvas>
+                </div>
+
+                <div class="transactions-card holo animate-slide" style="animation-delay: 0.7s;">
+                    <h2 class="chart-title">> TRANSACTION HISTORY</h2>
+                    ${data.transactions.map((tx, i) => `
+                        <div class="tx-item" style="animation: fadeIn 0.5s ease-out ${0.8 + i * 0.05}s backwards;">
+                            <div class="tx-left">
+                                <span class="tx-icon">${tx.type === 'win' ? '▲' : '▼'}</span>
+                                <div>
+                                    <p class="tx-pair">${tx.pair}</p>
+                                    <p class="tx-time">${tx.time}</p>
+                                </div>
+                            </div>
+                            <div class="tx-right">
+                                <p class="tx-amount">
+                                    ${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(4)} SOL
+                                </p>
+                                <p class="tx-type">${tx.type}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function drawChart() {
+        const canvas = document.getElementById('chart');
+        if (!canvas || !dashboardData) return;
+        
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width = canvas.offsetWidth;
+        const height = canvas.height = 350;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        const data = dashboardData.chartData;
+        const padding = 50;
+        const chartWidth = width - padding * 2;
+        const chartHeight = height - padding * 2;
+        
+        const values = data.map(d => d.balance);
+        const minVal = Math.min(...values) - 0.5;
+        const maxVal = Math.max(...values) + 0.5;
+        const range = maxVal - minVal;
+        
+        // Draw grid
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = padding + (chartHeight / 5) * i;
             ctx.beginPath();
-            data.forEach((point, i) => {
-                const x = padding + (chartWidth / (data.length - 1)) * i;
-                const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.lineTo(width - padding, height - padding);
-            ctx.lineTo(padding, height - padding);
-            ctx.closePath();
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            
-            // Line
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2.5;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
-            ctx.beginPath();
-            data.forEach((point, i) => {
-                const x = padding + (chartWidth / (data.length - 1)) * i;
-                const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
+            ctx.moveTo(padding, y);
+            ctx.lineTo(width - padding, y);
             ctx.stroke();
-            ctx.shadowBlur = 0;
-            
-            // Points
-            data.forEach((point, i) => {
-                if (i % 4 === 0 || i === data.length - 1) {
-                    const x = padding + (chartWidth / (data.length - 1)) * i;
-                    const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 4, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fill();
-                    ctx.strokeStyle = '#0a0a0a';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
-            
-            // Labels
-            ctx.fillStyle = '#808080';
-            ctx.font = 'bold 12px monospace';
-            ctx.fillText(maxVal.toFixed(2), 5, padding + 10);
-            ctx.fillText(minVal.toFixed(2), 5, height - padding + 10);
         }
-
-        function handleLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorContainer = document.getElementById('error-container');
+        
+        for (let i = 0; i <= 6; i++) {
+            const x = padding + (chartWidth / 6) * i;
+            ctx.beginPath();
+            ctx.moveTo(x, padding);
+            ctx.lineTo(x, height - padding);
+            ctx.stroke();
+        }
+        
+        // Draw gradient fill
+        const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        ctx.beginPath();
+        data.forEach((point, i) => {
+            const x = padding + (chartWidth / (data.length - 1)) * i;
+            const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
             
-            if (username === 'groovy9944' && password === 'user39zxnlojp') {
-                isLoading = true;
-                render();
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.lineTo(width - padding, height - padding);
+        ctx.lineTo(padding, height - padding);
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        // Draw line with glow
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#fff';
+        ctx.beginPath();
+        
+        data.forEach((point, i) => {
+            const x = padding + (chartWidth / (data.length - 1)) * i;
+            const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
+            
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        // Draw points
+        data.forEach((point, i) => {
+            if (i % 4 === 0 || i === data.length - 1) {
+                const x = padding + (chartWidth / (data.length - 1)) * i;
+                const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
                 
-                setTimeout(() => {
-                    isLoading = false;
-                    isLoggedIn = true;
-                    loginTimestamp = new Date();
-                    
-                    // SAVE SESSION TO LOCALSTORAGE
-                    sessionManager.saveSession();
-                    
-                    dashboardData = generateDashboardData();
-                    render();
-                    drawChart();
-                    
-                    // Update every 10 seconds
-                    if (updateInterval) clearInterval(updateInterval);
-                    updateInterval = setInterval(() => {
-                        if (isLoggedIn) {
-                            dashboardData = generateDashboardData();
-                            render();
-                            if (document.getElementById('chart')) {
-                                drawChart();
-                            }
-                        }
-                    }, 10000);
-                }, 3000);
-            } else {
-                errorContainer.innerHTML = '<div class="error-box">❌ Invalid credentials. No account available or incorrect password.</div>';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Add glow to points
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#fff';
+                ctx.fill();
+                ctx.shadowBlur = 0;
             }
+        });
+        
+        // Draw labels
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.font = '11px Orbitron';
+        ctx.textAlign = 'left';
+        ctx.fillText(maxVal.toFixed(2), 5, padding + 15);
+        ctx.fillText(minVal.toFixed(2), 5, height - padding + 15);
+        
+        // Draw time labels
+        ctx.textAlign = 'center';
+        for (let i = 0; i < data.length; i += 4) {
+            const x = padding + (chartWidth / (data.length - 1)) * i;
+            ctx.fillText(data[i].time, x, height - padding + 30);
         }
+    }
 
-        function openWithdrawModal() {
-            showWithdrawModal = true;
-            render();
-        }
-
-        function closeWithdrawModal() {
-            showWithdrawModal = false;
-            render();
-        }
-
-        function processWithdrawal() {
-            const walletAddress = document.getElementById('wallet-address').value;
-            const amount = document.getElementById('withdraw-amount').value;
-            
-            if (!walletAddress || !amount) {
-                alert('Please fill in all fields');
-                return;
-            }
-            
-            withdrawProcessing = true;
-            showWithdrawModal = false;
+    function handleLogin() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorContainer = document.getElementById('error-container');
+        
+        if (username === 'Groovy9944' && password === 'user39zxnlojp') {
             isLoading = true;
             render();
             
             setTimeout(() => {
                 isLoading = false;
-                withdrawProcessing = false;
-                showAlert = true;
-                render();
-            }, 5500);
-        }
-
-        function closeAlert() {
-            showAlert = false;
-            render();
-        }
-
-        function render() {
-            let content = '';
-            
-            if (isLoading) {
-                if (withdrawProcessing) {
-                    content = renderLoading('PROCESSING WITHDRAWAL', 'Validating wallet address...');
-                } else {
-                    content = renderLoading('AUTHENTICATING', 'Verifying credentials...');
-                }
-            } else if (showAlert) {
-                content = renderAlert();
-            } else if (showWithdrawModal) {
-                content = renderDashboard() + renderWithdrawModal();
-            } else if (isLoggedIn) {
-                content = renderDashboard();
-            } else {
-                content = renderLogin();
-            }
-            
-            document.getElementById('app').innerHTML = content;
-        }
-
-        // Enter key support
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !isLoggedIn && !isLoading) {
-                const username = document.getElementById('username');
-                const password = document.getElementById('password');
-                if (username && password) {
-                    handleLogin();
-                }
-            }
-        });
-
-        // ===== CHECK SESSION ON PAGE LOAD =====
-        window.addEventListener('load', () => {
-            const session = sessionManager.getSession();
-            
-            if (session && session.isSessionValid()) {
-                // Restore login session
                 isLoggedIn = true;
-                loginTimestamp = new Date(session.loginTime);
                 dashboardData = generateDashboardData();
                 render();
                 drawChart();
                 
-                // Resume updates
-                if (updateInterval) clearInterval(updateInterval);
-                updateInterval = setInterval(() => {
-                    if (isLoggedIn) {
-                        dashboardData = generateDashboardData();
-                        render();
-                        if (document.getElementById('chart')) {
-                            drawChart();
-                        }
-                    }
-                }, 10000);
-            } else {
-                // Show login page
-                render();
-            }
-        });
+                setInterval(() => {
+                    dashboardData = generateDashboardData();
+                    render();
+                    drawChart();
+                }, 30000);
+            }, 4000);
+        } else {
+            errorContainer.innerHTML = '<div class="error-box">⛔ ACCESS DENIED // INVALID CREDENTIALS</div>';
+        }
+    }
 
-        // Initial render
+    function openWithdrawModal() {
+        showWithdrawModal = true;
         render();
-    </script>
+    }
+
+    function closeWithdrawModal() {
+        showWithdrawModal = false;
+        render();
+    }
+
+    function processWithdrawal() {
+        const walletAddress = document.getElementById('wallet-address').value;
+        const amount = document.getElementById('withdraw-amount').value;
+        
+        if (!walletAddress || !amount) {
+            alert('PLEASE FILL IN ALL FIELDS');
+            return;
+        }
+        
+        withdrawProcessing = true;
+        showWithdrawModal = false;
+        isLoading = true;
+        render();
+        
+        const loadingTexts = [
+            { text: 'PROCESSING WITHDRAWAL', sub: 'Validating wallet address...' },
+            { text: 'VERIFYING TRANSACTION', sub: 'Checking account balance...' },
+            { text: 'ANALYZING DRAWDOWN', sub: 'Calculating risk parameters...' },
+            { text: 'FINALIZING REQUEST', sub: 'Completing verification...' }
+        ];
+        
+        let currentText = 0;
+        const textInterval = setInterval(() => {
+            if (currentText < loadingTexts.length - 1) {
+                currentText++;
+                const loadingTextEl = document.querySelector('.loading-text');
+                const loadingSubEl = document.querySelector('.loading-subtext');
+                if (loadingTextEl && loadingSubEl) {
+                    loadingTextEl.textContent = loadingTexts[currentText].text;
+                    loadingSubEl.textContent = loadingTexts[currentText].sub;
+                }
+            }
+        }, 2000);
+        
+        setTimeout(() => {
+            clearInterval(textInterval);
+            isLoading = false;
+            withdrawProcessing = false;
+            showAlert = true;
+            render();
+        }, 7000);
+    }
+
+    function closeAlert() {
+        showAlert = false;
+        render();
+    }
+
+    function render() {
+        let content = '';
+        
+        if (isLoading) {
+            if (withdrawProcessing) {
+                content = renderLoading('PROCESSING WITHDRAWAL', 'Validating wallet address...');
+            } else {
+                content = renderLoading('AUTHENTICATING', 'Verifying credentials...');
+            }
+        } else if (showAlert) {
+            content = renderAlert();
+        } else if (showWithdrawModal) {
+            content = renderDashboard() + renderWithdrawModal();
+        } else if (isLoggedIn) {
+            content = renderDashboard();
+        } else {
+            content = renderLogin();
+        }
+        
+        document.getElementById('app').innerHTML = content;
+    }
+
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !isLoggedIn && !isLoading) {
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            if (username && password) {
+                handleLogin();
+            }
+        }
+    });
+
+    render();
+</script>
+```
+
 </body>
 </html>
