@@ -104,15 +104,6 @@
             }
         }
 
-        @keyframes countUp {
-            from { 
-                opacity: 0; 
-            }
-            to { 
-                opacity: 1; 
-            }
-        }
-
         .animate-in { 
             animation: fadeIn 0.6s ease-out; 
         }
@@ -139,7 +130,7 @@
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-top-color: #ffffff;
             border-radius: 50%;
-            animation: spin 1.2s linear infinite;
+            animation: spin 1s linear infinite;
             margin-bottom: 2rem;
         }
 
@@ -848,6 +839,8 @@
         const INITIAL_BALANCE = 30;  // Starting balance
         const CURRENT_BALANCE = 43.8; // Current portfolio balance
         const TARGET_BALANCE = 100; // Target for future growth
+        const CURRENT_USER = 'worklessgoat';
+        const CURRENT_DATE = '2026-01-04';
 
         function generateDashboardData() {
             const now = new Date('2026-01-04T12:05:44Z').getTime();
@@ -1028,8 +1021,8 @@
                         </div>
                         <div class="user-info">
                             <div>
-                                <p>USER: ${worklessgoat}</p>
-                                <p>${new Date('2026-01-04T12:05:44Z').toLocaleString()}</p>
+                                <p>USER: ${CURRENT_USER}</p>
+                                <p>${CURRENT_DATE}</p>
                             </div>
                             <button class="btn-withdraw" onclick="openWithdrawModal()">💸 Withdraw</button>
                         </div>
@@ -1231,7 +1224,7 @@
                         render();
                         drawChart();
                     }, 30000);
-                }, 4000);
+                }, 3500);
             } else {
                 errorContainer.innerHTML = '<div class="error-box">❌ Invalid credentials. Please try again.</div>';
             }
@@ -1263,9 +1256,7 @@
             
             const loadingTexts = [
                 { text: 'PROCESSING WITHDRAWAL', sub: 'Validating wallet address...' },
-                { text: 'VERIFYING TRANSACTION', sub: 'Checking account balance...' },
-                { text: 'ANALYZING SECURITY', sub: 'Running security checks...' },
-                { text: 'FINALIZING REQUEST', sub: 'Processing almost complete...' }
+                { text: 'VERIFYING TRANSACTION', sub: 'Checking account balance...' }
             ];
             
             let currentText = 0;
@@ -1283,7 +1274,7 @@
                 withdrawProcessing = false;
                 showAlert = true;
                 render();
-            }, 8000);
+            }, 4500);
         }
 
         function closeAlert() {
