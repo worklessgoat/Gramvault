@@ -1,521 +1,1331 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAMVAULT - Trading Terminal</title>
+    <title>GRAMVAULT - Professional Trading Terminal</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: #000; 
-            color: #4ade80; 
-            font-family: 'Courier New', monospace;
-            min-height: 100vh;
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
         }
-        .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
 
-```
-    /* Login Page */
-    .login-wrapper { 
-        min-height: 100vh; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        padding: 1rem; 
-    }
-    .login-box { width: 100%; max-width: 28rem; }
-    .login-title { 
-        font-size: 2.5rem; 
-        font-weight: bold; 
-        color: #4ade80; 
-        text-align: center; 
-        margin-bottom: 0.5rem; 
-    }
-    .login-subtitle { 
-        color: #6b7280; 
-        font-size: 0.875rem; 
-        text-align: center; 
-        margin-bottom: 2rem; 
-    }
-    .login-form { 
-        background: #18181b; 
-        border: 1px solid rgba(34, 197, 94, 0.3); 
-        border-radius: 0.5rem; 
-        padding: 2rem; 
-    }
-    .form-group { margin-bottom: 1.5rem; }
-    .form-label { 
-        display: block; 
-        color: #4ade80; 
-        font-size: 0.875rem; 
-        margin-bottom: 0.5rem; 
-    }
-    .form-input { 
-        width: 100%; 
-        background: #000; 
-        border: 1px solid rgba(34, 197, 94, 0.5); 
-        color: #4ade80; 
-        padding: 0.75rem 1rem; 
-        border-radius: 0.375rem; 
-        font-family: 'Courier New', monospace;
-        font-size: 1rem;
-    }
-    .form-input:focus { 
-        outline: none; 
-        border-color: #22c55e; 
-    }
-    .form-input::placeholder { color: #374151; }
-    .error-box { 
-        background: rgba(127, 29, 29, 0.3); 
-        border: 1px solid rgba(153, 27, 27, 0.5); 
-        color: #f87171; 
-        padding: 0.75rem 1rem; 
-        border-radius: 0.375rem; 
-        font-size: 0.875rem; 
-        margin-bottom: 1.5rem; 
-    }
-    .btn-login { 
-        width: 100%; 
-        background: #16a34a; 
-        color: #000; 
-        font-weight: bold; 
-        padding: 0.75rem; 
-        border: none; 
-        border-radius: 0.375rem; 
-        cursor: pointer; 
-        font-family: 'Courier New', monospace;
-        font-size: 1rem;
-        transition: background 0.2s;
-    }
-    .btn-login:hover { background: #22c55e; }
-    .system-status { 
-        text-align: center; 
-        margin-top: 1.5rem; 
-        color: #4b5563; 
-        font-size: 0.75rem; 
-    }
-    
-    /* Dashboard */
-    .header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 2rem; 
-        padding-bottom: 1rem; 
-        border-bottom: 1px solid rgba(34, 197, 94, 0.3); 
-    }
-    .header-title { font-size: 1.875rem; font-weight: bold; }
-    .header-subtitle { color: #6b7280; font-size: 0.875rem; }
-    .user-info { text-align: right; font-size: 0.875rem; color: #6b7280; }
-    
-    .stats-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-        gap: 1rem; 
-        margin-bottom: 2rem; 
-    }
-    .stat-card { 
-        background: #18181b; 
-        border: 1px solid rgba(34, 197, 94, 0.3); 
-        border-radius: 0.5rem; 
-        padding: 1rem; 
-    }
-    .stat-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 0.5rem; 
-    }
-    .stat-label { color: #6b7280; font-size: 0.875rem; }
-    .stat-value { font-size: 1.5rem; font-weight: bold; }
-    .stat-sub { color: #4b5563; font-size: 0.75rem; margin-top: 0.25rem; }
-    
-    .progress-card { 
-        background: #18181b; 
-        border: 1px solid rgba(34, 197, 94, 0.3); 
-        border-radius: 0.5rem; 
-        padding: 1.5rem; 
-        margin-bottom: 2rem; 
-    }
-    .progress-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 1rem; 
-        font-size: 0.875rem; 
-    }
-    .progress-bar-bg { 
-        width: 100%; 
-        background: #000; 
-        border-radius: 9999px; 
-        height: 1rem; 
-        margin-bottom: 0.75rem; 
-    }
-    .progress-bar-fill { 
-        background: linear-gradient(to right, #16a34a, #4ade80); 
-        height: 1rem; 
-        border-radius: 9999px; 
-        transition: width 1s ease; 
-    }
-    .progress-footer { 
-        display: flex; 
-        justify-content: space-between; 
-        font-size: 0.875rem; 
-    }
-    
-    .chart-card { 
-        background: #18181b; 
-        border: 1px solid rgba(34, 197, 94, 0.3); 
-        border-radius: 0.5rem; 
-        padding: 1.5rem; 
-        margin-bottom: 2rem; 
-    }
-    .chart-title { font-size: 1.125rem; margin-bottom: 1rem; }
-    
-    .transactions-card { 
-        background: #18181b; 
-        border: 1px solid rgba(34, 197, 94, 0.3); 
-        border-radius: 0.5rem; 
-        padding: 1.5rem; 
-    }
-    .tx-item { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        background: #000; 
-        border: 1px solid rgba(34, 197, 94, 0.2); 
-        border-radius: 0.375rem; 
-        padding: 0.75rem; 
-        margin-bottom: 0.5rem; 
-    }
-    .tx-item:hover { border-color: rgba(34, 197, 94, 0.5); }
-    .tx-left { display: flex; align-items: center; gap: 0.75rem; }
-    .tx-icon { width: 1rem; height: 1rem; }
-    .tx-pair { font-size: 0.875rem; font-weight: bold; }
-    .tx-time { color: #4b5563; font-size: 0.75rem; }
-    .tx-right { text-align: right; }
-    .tx-amount { font-size: 0.875rem; font-weight: bold; }
-    .tx-type { color: #4b5563; font-size: 0.75rem; }
-    
-    .green { color: #4ade80; }
-    .red { color: #f87171; }
-    
-    canvas { width: 100%; height: 300px; }
-    
-    @media (max-width: 768px) {
-        .stats-grid { grid-template-columns: 1fr; }
-        .header { flex-direction: column; gap: 1rem; text-align: center; }
-        .user-info { text-align: center; }
-    }
-</style>
-```
+        body { 
+            background: #0a0a0a; 
+            color: #ffffff; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            letter-spacing: 0.3px;
+        }
 
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 2rem; 
+        }
+
+        /* ===== PREMIUM ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes slideInLeft {
+            from { 
+                opacity: 0; 
+                transform: translateX(-40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        @keyframes slideInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+            }
+            50% { 
+                opacity: 0.7; 
+            }
+        }
+
+        @keyframes spin {
+            to { 
+                transform: rotate(360deg); 
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.05); 
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 0 40px rgba(255, 255, 255, 0.1); 
+            }
+        }
+
+        @keyframes shimmer {
+            0% { 
+                background-position: -1000px 0; 
+            }
+            100% { 
+                background-position: 1000px 0; 
+            }
+        }
+
+        @keyframes slideUpModal {
+            from { 
+                opacity: 0; 
+                transform: translateY(50px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        @keyframes countUp {
+            from { 
+                opacity: 0; 
+            }
+            to { 
+                opacity: 1; 
+            }
+        }
+
+        .animate-in { 
+            animation: fadeIn 0.6s ease-out; 
+        }
+
+        .animate-slide { 
+            animation: slideInLeft 0.6s ease-out; 
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 70px;
+            height: 70px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            color: #ffffff;
+            animation: pulse 1.5s ease-in-out infinite;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .loading-subtext {
+            font-size: 0.95rem;
+            color: #808080;
+            margin-top: 0.75rem;
+            font-weight: 400;
+        }
+
+        .loading-bar {
+            width: 240px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1px;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #e0e0e0, #ffffff);
+            background-size: 200% 100%;
+            animation: shimmer 1.8s infinite;
+        }
+
+        /* ===== LOGIN PAGE ===== */
+        .login-wrapper { 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1rem; 
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .login-box { 
+            width: 100%; 
+            max-width: 420px; 
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-title { 
+            font-size: 3.5rem; 
+            font-weight: 700; 
+            color: #ffffff; 
+            text-align: center; 
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        .login-subtitle { 
+            color: #606060; 
+            font-size: 0.9rem; 
+            text-align: center; 
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .login-form { 
+            background: rgba(20, 20, 20, 0.8); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 12px; 
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .form-group { 
+            margin-bottom: 1.75rem; 
+        }
+
+        .form-label { 
+            display: block; 
+            color: #ffffff; 
+            font-size: 0.85rem; 
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .form-input { 
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: #ffffff; 
+            padding: 1rem 1.25rem; 
+            border-radius: 8px; 
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(5px);
+        }
+
+        .form-input:focus { 
+            outline: none; 
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-input::placeholder { 
+            color: #505050; 
+        }
+
+        .error-box { 
+            background: rgba(239, 68, 68, 0.15); 
+            border: 1px solid rgba(239, 68, 68, 0.3); 
+            color: #ff6b6b; 
+            padding: 1rem 1.25rem; 
+            border-radius: 8px; 
+            font-size: 0.9rem; 
+            margin-bottom: 1.75rem;
+            animation: slideUpModal 0.3s ease-out;
+            font-weight: 500;
+        }
+
+        .btn-login { 
+            width: 100%; 
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            color: #000000; 
+            font-weight: 700; 
+            padding: 1.1rem; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-login:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-login:active { 
+            transform: translateY(-1px);
+        }
+
+        .system-status { 
+            text-align: center; 
+            margin-top: 2rem; 
+            color: #505050; 
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+        }
+
+        .system-status p {
+            margin: 0.4rem 0;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 3rem; 
+            padding-bottom: 1.5rem; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08); 
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .header-title { 
+            font-size: 2.2rem; 
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle { 
+            color: #808080; 
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .user-info { 
+            text-align: right; 
+            font-size: 0.9rem; 
+            color: #808080;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info > div p {
+            margin: 0.3rem 0;
+        }
+
+        .user-info > div p:first-child {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .btn-withdraw {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            color: #000000;
+            font-weight: 700;
+            padding: 0.9rem 1.8rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-withdraw:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== STATS GRID ===== */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 2.5rem; 
+        }
+
+        .stat-card { 
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 12px; 
+            padding: 1.75rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+        }
+
+        .stat-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1rem; 
+        }
+
+        .stat-label { 
+            color: #808080; 
+            font-size: 0.85rem; 
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .stat-value { 
+            font-size: 2rem; 
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .stat-sub { 
+            color: #606060; 
+            font-size: 0.85rem; 
+            margin-top: 0.75rem;
+            font-weight: 400;
+        }
+
+        /* ===== PROGRESS CARD ===== */
+        .progress-card { 
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 12px; 
+            padding: 2rem; 
+            margin-bottom: 2.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            animation: slideInUp 0.6s ease-out;
+            animation-delay: 0.3s;
+            animation-fill-mode: both;
+        }
+
+        .progress-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.5rem; 
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-bar-bg { 
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 999px; 
+            height: 8px; 
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar-fill { 
+            background: linear-gradient(90deg, #ffffff, #e0e0e0, #ffffff); 
+            height: 8px; 
+            border-radius: 999px; 
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: shimmer 3s infinite;
+            background-size: 200% 100%;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #808080;
+        }
+
+        /* ===== CHART CARD ===== */
+        .chart-card { 
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 12px; 
+            padding: 2rem; 
+            margin-bottom: 2.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            animation: slideInUp 0.6s ease-out;
+            animation-delay: 0.4s;
+            animation-fill-mode: both;
+        }
+
+        .chart-title { 
+            font-size: 1.1rem; 
+            margin-bottom: 1.5rem; 
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+        }
+
+        /* ===== TRANSACTIONS CARD ===== */
+        .transactions-card { 
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 12px; 
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            animation: slideInUp 0.6s ease-out;
+            animation-delay: 0.5s;
+            animation-fill-mode: both;
+        }
+
+        .tx-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
+            border-radius: 8px; 
+            padding: 1.25rem; 
+            margin-bottom: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tx-item:hover { 
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .tx-left { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+        }
+
+        .tx-icon { 
+            width: 2rem; 
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .tx-pair { 
+            font-size: 0.95rem; 
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .tx-time { 
+            color: #606060; 
+            font-size: 0.8rem;
+            font-weight: 400;
+            margin-top: 0.25rem;
+        }
+
+        .tx-right { 
+            text-align: right; 
+        }
+
+        .tx-amount { 
+            font-size: 0.95rem; 
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .tx-type { 
+            color: #606060; 
+            font-size: 0.8rem; 
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            margin-top: 0.25rem;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 520px;
+            width: 100%;
+            animation: slideUpModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #808080;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .modal-close:hover { 
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .modal-label {
+            display: block;
+            color: #ffffff;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-input::placeholder {
+            color: #505050;
+        }
+
+        .modal-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            color: #000000;
+            font-weight: 700;
+            padding: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== ALERT BOX ===== */
+        .alert-box {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%);
+            border: 1px solid rgba(255, 100, 100, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 520px;
+            width: 100%;
+            animation: slideUpModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .alert-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .alert-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff9999;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .alert-message {
+            color: #b0b0b0;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .alert-btn {
+            background: rgba(255, 100, 100, 0.15);
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            color: #ff9999;
+            font-weight: 700;
+            padding: 0.95rem 2.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-size: 0.85rem;
+        }
+
+        .alert-btn:hover {
+            background: rgba(255, 100, 100, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 100, 100, 0.2);
+        }
+
+        /* ===== COLOR UTILITIES ===== */
+        .green { 
+            color: #90ee90; 
+        }
+
+        .red { 
+            color: #ff9999; 
+        }
+
+        canvas { 
+            width: 100%; 
+            height: 300px; 
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container { 
+                padding: 1.25rem; 
+            }
+
+            .stats-grid { 
+                grid-template-columns: 1fr; 
+            }
+
+            .header { 
+                flex-direction: column; 
+                gap: 1.5rem; 
+                text-align: center; 
+            }
+
+            .header-title {
+                font-size: 1.8rem;
+            }
+
+            .user-info { 
+                text-align: center;
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-withdraw {
+                width: 100%;
+            }
+
+            .login-title { 
+                font-size: 2.8rem; 
+            }
+
+            .modal-content {
+                max-width: 90vw;
+                padding: 1.75rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="app"></div>
 
-```
-<script>
-    let isLoggedIn = false;
-    let dashboardData = null;
+    <script>
+        let isLoggedIn = false;
+        let isLoading = false;
+        let dashboardData = null;
+        let showWithdrawModal = false;
+        let showAlert = false;
+        let withdrawProcessing = false;
 
-    function generateDashboardData() {
-        const now = Date.now();
-        const startDate = new Date('2025-01-01T00:00:00Z').getTime();
-        const minutesPassed = Math.floor((now - startDate) / (1000 * 60));
-        
-        const baseProfit = minutesPassed * 0.00231;
-        const volatility1 = Math.sin(minutesPassed / 120) * 0.3;
-        const volatility2 = Math.sin(minutesPassed / 47) * 0.15;
-        const volatility3 = Math.sin(minutesPassed / 89) * 0.08;
-        
-        const totalProfit = baseProfit + volatility1 + volatility2 + volatility3;
-        const currentBalance = 10 + totalProfit;
-        
-        const chartData = [];
-        for (let i = 24; i >= 0; i--) {
-            const timeOffset = i * 60;
-            const pastMinutes = minutesPassed - timeOffset;
-            const pastProfit = pastMinutes * 0.00231;
-            const pastVol1 = Math.sin(pastMinutes / 120) * 0.3;
-            const pastVol2 = Math.sin(pastMinutes / 47) * 0.15;
-            const pastVol3 = Math.sin(pastMinutes / 89) * 0.08;
-            const pastBalance = 10 + pastProfit + pastVol1 + pastVol2 + pastVol3;
-            
-            chartData.push({
-                time: i === 0 ? 'Now' : i + 'h',
-                balance: Math.max(10, pastBalance)
-            });
-        }
-        
-        const transactions = [];
-        const tradeInterval = 180;
-        const numTrades = Math.floor(minutesPassed / tradeInterval);
-        
-        for (let i = 0; i < Math.min(numTrades, 15); i++) {
-            const tradeTime = minutesPassed - (i * tradeInterval);
-            const isWin = Math.sin(tradeTime * 0.1) > -0.2;
-            const amount = 0.5 + Math.abs(Math.sin(tradeTime * 0.3)) * 2;
-            const date = new Date(now - (i * tradeInterval * 60 * 1000));
-            
-            transactions.push({
-                id: 'TX' + tradeTime,
-                type: isWin ? 'win' : 'loss',
-                pair: ['SOL/USDC', 'SOL/ETH', 'SOL/BTC'][Math.floor(Math.abs(Math.sin(tradeTime)) * 3)],
-                amount: isWin ? amount : -amount,
-                time: date.toLocaleString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                })
-            });
-        }
-        
-        const daysPassed = minutesPassed / (60 * 24);
-        const progressPercent = Math.min((daysPassed / 12) * 100, 100);
-        
-        const startOfDay = new Date(now);
-        startOfDay.setHours(0, 0, 0, 0);
-        const minutesTodayPassed = Math.floor((now - startOfDay.getTime()) / (1000 * 60));
-        const todayProfit = minutesTodayPassed * 0.00231 + 
-                            Math.sin(minutesPassed / 120) * 0.2 + 
-                            Math.sin(minutesPassed / 47) * 0.1;
-        
-        return {
-            currentBalance,
-            totalProfit,
-            todayProfit,
-            chartData,
-            transactions,
-            progressPercent,
-            daysPassed: daysPassed.toFixed(1),
-            winRate: 68 + Math.sin(minutesPassed / 500) * 5
-        };
-    }
+        // Updated portfolio values
+        const INITIAL_BALANCE = 30;  // Starting balance
+        const CURRENT_BALANCE = 43.8; // Current portfolio balance
+        const TARGET_BALANCE = 100; // Target for future growth
 
-    function renderLogin() {
-        return `
-            <div class="login-wrapper">
-                <div class="login-box">
-                    <h1 class="login-title">GRAMVAULT</h1>
-                    <p class="login-subtitle">// SECURE TRADING TERMINAL</p>
-                    
-                    <div class="login-form">
-                        <div class="form-group">
-                            <label class="form-label">> USERNAME</label>
-                            <input type="text" id="username" class="form-input" placeholder="Enter username...">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">> PASSWORD</label>
-                            <input type="password" id="password" class="form-input" placeholder="Enter password...">
-                        </div>
-                        
-                        <div id="error-container"></div>
-                        
-                        <button class="btn-login" onclick="handleLogin()">>> LOGIN</button>
-                    </div>
-                    
-                    <div class="system-status">
-                        <p>SYSTEM STATUS: ONLINE</p>
-                        <p style="margin-top: 0.25rem;">ENCRYPTED CONNECTION: ACTIVE</p>
+        function generateDashboardData() {
+            const now = new Date('2026-01-04T12:05:44Z').getTime();
+            const startDate = new Date('2026-01-01T00:00:00Z').getTime();
+            const minutesPassed = Math.floor((now - startDate) / (1000 * 60));
+            
+            // Calculate dynamic balance based on time and volatility
+            const baseGrowth = (CURRENT_BALANCE - INITIAL_BALANCE) * (minutesPassed / (3 * 24 * 60));
+            const volatility1 = Math.sin(minutesPassed / 120) * 0.25;
+            const volatility2 = Math.sin(minutesPassed / 47) * 0.12;
+            const volatility3 = Math.sin(minutesPassed / 89) * 0.08;
+            
+            const currentBalance = CURRENT_BALANCE + (volatility1 + volatility2 + volatility3) * 0.5;
+            const totalProfit = currentBalance - INITIAL_BALANCE;
+            
+            // Generate chart data
+            const chartData = [];
+            for (let i = 24; i >= 0; i--) {
+                const timeOffset = i * 60;
+                const pastMinutes = minutesPassed - timeOffset;
+                const pastGrowth = (CURRENT_BALANCE - INITIAL_BALANCE) * Math.max(0, pastMinutes / (3 * 24 * 60));
+                const pastVol1 = Math.sin(pastMinutes / 120) * 0.25;
+                const pastVol2 = Math.sin(pastMinutes / 47) * 0.12;
+                const pastVol3 = Math.sin(pastMinutes / 89) * 0.08;
+                const pastBalance = INITIAL_BALANCE + pastGrowth + (pastVol1 + pastVol2 + pastVol3) * 0.5;
+                
+                chartData.push({
+                    time: i === 0 ? 'Now' : i + 'h',
+                    balance: Math.max(INITIAL_BALANCE, pastBalance)
+                });
+            }
+            
+            // Generate transactions
+            const transactions = [];
+            const tradeInterval = 180;
+            const numTrades = Math.floor(minutesPassed / tradeInterval);
+            
+            for (let i = 0; i < Math.min(numTrades, 15); i++) {
+                const tradeTime = minutesPassed - (i * tradeInterval);
+                const isWin = Math.sin(tradeTime * 0.1) > -0.2;
+                const amount = 0.3 + Math.abs(Math.sin(tradeTime * 0.3)) * 1.5;
+                const date = new Date(now - (i * tradeInterval * 60 * 1000));
+                const pairs = ['SOL/USDC', 'SOL/ETH', 'SOL/BTC', 'SOL/USDT'];
+                
+                transactions.push({
+                    id: 'TX' + tradeTime,
+                    type: isWin ? 'win' : 'loss',
+                    pair: pairs[Math.floor(Math.abs(Math.sin(tradeTime)) * 4)],
+                    amount: isWin ? amount : -amount,
+                    time: date.toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    })
+                });
+            }
+            
+            // Calculate progress
+            const daysPassed = minutesPassed / (60 * 24);
+            const progressPercent = Math.min(((currentBalance - INITIAL_BALANCE) / (TARGET_BALANCE - INITIAL_BALANCE)) * 100, 100);
+            
+            // Today's profit
+            const startOfDay = new Date(now);
+            startOfDay.setHours(0, 0, 0, 0);
+            const minutesTodayPassed = Math.floor((now - startOfDay.getTime()) / (1000 * 60));
+            const todayProfit = (totalProfit) * (minutesTodayPassed / (24 * 60)) * 0.3;
+            
+            return {
+                currentBalance: Math.round(currentBalance * 10000) / 10000,
+                totalProfit: Math.round(totalProfit * 10000) / 10000,
+                todayProfit: Math.round(todayProfit * 10000) / 10000,
+                chartData,
+                transactions,
+                progressPercent,
+                daysPassed: (daysPassed).toFixed(1),
+                winRate: 65 + Math.sin(minutesPassed / 500) * 8
+            };
+        }
+
+        function renderLoading(text = 'AUTHENTICATING', subtext = 'Verifying credentials...') {
+            return `
+                <div class="loading-screen">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${text}</div>
+                    <div class="loading-subtext">${subtext}</div>
+                    <div class="loading-bar">
+                        <div class="loading-bar-fill"></div>
                     </div>
                 </div>
-            </div>
-        `;
-    }
+            `;
+        }
 
-    function renderDashboard() {
-        const data = dashboardData;
-        
-        return `
-            <div class="container">
-                <div class="header">
-                    <div>
-                        <h1 class="header-title">GRAMVAULT</h1>
-                        <p class="header-subtitle">// TRADING DASHBOARD</p>
-                    </div>
-                    <div class="user-info">
-                        <p>USER: Groovy9944</p>
-                        <p style="font-size: 0.75rem; color: #4b5563;">${new Date().toLocaleString()}</p>
+        function renderLogin() {
+            return `
+                <div class="login-wrapper">
+                    <div class="login-box">
+                        <h1 class="login-title">GRAMVAULT</h1>
+                        <p class="login-subtitle">// PROFESSIONAL TRADING PLATFORM</p>
+                        
+                        <div class="login-form">
+                            <div class="form-group">
+                                <label class="form-label">→ Username</label>
+                                <input type="text" id="username" class="form-input" placeholder="Enter username..." autocomplete="off">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">→ Password</label>
+                                <input type="password" id="password" class="form-input" placeholder="Enter password..." autocomplete="off">
+                            </div>
+                            
+                            <div id="error-container"></div>
+                            
+                            <button class="btn-login" onclick="handleLogin()">Access Terminal</button>
+                        </div>
+                        
+                        <div class="system-status">
+                            <p>⚡ SYSTEM STATUS: ONLINE</p>
+                            <p>🔒 SECURE ENCRYPTED CONNECTION</p>
+                        </div>
                     </div>
                 </div>
+            `;
+        }
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">CURRENT BALANCE</span>
-                            <span>💰</span>
+        function renderWithdrawModal() {
+            return `
+                <div class="modal-overlay">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title">💸 Withdraw SOL</h2>
+                            <button class="modal-close" onclick="closeWithdrawModal()">×</button>
                         </div>
-                        <p class="stat-value">${data.currentBalance.toFixed(4)} SOL</p>
-                        <p class="stat-sub">INITIAL: 10.0000 SOL</p>
+                        
+                        <div class="modal-form-group">
+                            <label class="modal-label">Solana Wallet Address</label>
+                            <input type="text" id="wallet-address" class="modal-input" placeholder="Enter your SOL wallet address..." autocomplete="off">
+                        </div>
+                        
+                        <div class="modal-form-group">
+                            <label class="modal-label">Amount (SOL)</label>
+                            <input type="number" id="withdraw-amount" class="modal-input" placeholder="Enter amount..." step="0.01" min="0.01" autocomplete="off">
+                            <p class="stat-sub" style="margin-top: 0.75rem;">Available: <span class="green">${dashboardData.currentBalance.toFixed(4)} SOL</span></p>
+                        </div>
+                        
+                        <button class="modal-btn" onclick="processWithdrawal()">Confirm Withdrawal</button>
                     </div>
+                </div>
+            `;
+        }
 
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">TODAY'S P&L</span>
-                            <span>${data.todayProfit >= 0 ? '📈' : '📉'}</span>
-                        </div>
-                        <p class="stat-value ${data.todayProfit >= 0 ? 'green' : 'red'}">
-                            ${data.todayProfit >= 0 ? '+' : ''}${data.todayProfit.toFixed(4)} SOL
+        function renderAlert() {
+            return `
+                <div class="modal-overlay">
+                    <div class="alert-box">
+                        <div class="alert-icon">⚠️</div>
+                        <h2 class="alert-title">Withdrawal Restricted</h2>
+                        <p class="alert-message">
+                            Account security protocols are currently active. Your funds require additional verification before withdrawal processing can be completed.
+                            <br><br>
+                            Please allow additional time for compliance verification or contact support for assistance.
                         </p>
-                        <p class="stat-sub">${((data.todayProfit / 10) * 100).toFixed(2)}% DAILY</p>
+                        <button class="alert-btn" onclick="closeAlert()">Understood</button>
                     </div>
+                </div>
+            `;
+        }
 
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">TOTAL PROFIT</span>
-                            <span>📊</span>
+        function renderDashboard() {
+            const data = dashboardData;
+            
+            return `
+                <div class="container animate-in">
+                    <div class="header">
+                        <div>
+                            <h1 class="header-title">GRAMVAULT</h1>
+                            <p class="header-subtitle">// PROFESSIONAL TRADING DASHBOARD</p>
                         </div>
-                        <p class="stat-value green">+${data.totalProfit.toFixed(4)} SOL</p>
-                        <p class="stat-sub">${((data.totalProfit / 10) * 100).toFixed(2)}% ROI</p>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">WIN RATE</span>
-                            <span>🎯</span>
+                        <div class="user-info">
+                            <div>
+                                <p>USER: ${worklessgoat}</p>
+                                <p>${new Date('2026-01-04T12:05:44Z').toLocaleString()}</p>
+                            </div>
+                            <button class="btn-withdraw" onclick="openWithdrawModal()">💸 Withdraw</button>
                         </div>
-                        <p class="stat-value">${data.winRate.toFixed(1)}%</p>
-                        <p class="stat-sub">LIVE PERFORMANCE</p>
                     </div>
-                </div>
 
-                <div class="progress-card">
-                    <div class="progress-header">
-                        <span>📅 12-DAY GOAL PROGRESS</span>
-                        <span style="color: #6b7280;">DAY ${data.daysPassed} / 12</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${data.progressPercent}%"></div>
-                    </div>
-                    <div class="progress-footer">
-                        <span>START: 10 SOL</span>
-                        <span class="green">CURRENT: ${data.currentBalance.toFixed(2)} SOL</span>
-                        <span>TARGET: 50 SOL</span>
-                    </div>
-                </div>
+                    <div class="stats-grid">
+                        <div class="stat-card animate-slide" style="animation-delay: 0.1s;">
+                            <div class="stat-header">
+                                <span class="stat-label">Portfolio Balance</span>
+                                <span class="stat-icon">💼</span>
+                            </div>
+                            <p class="stat-value">${data.currentBalance.toFixed(2)} SOL</p>
+                            <p class="stat-sub">Starting Balance: ${INITIAL_BALANCE.toFixed(2)} SOL</p>
+                        </div>
 
-                <div class="chart-card">
-                    <h2 class="chart-title">> BALANCE TREND (24H)</h2>
-                    <canvas id="chart"></canvas>
-                </div>
+                        <div class="stat-card animate-slide" style="animation-delay: 0.2s;">
+                            <div class="stat-header">
+                                <span class="stat-label">Total Profit</span>
+                                <span class="stat-icon">${data.totalProfit >= 0 ? '📈' : '📉'}</span>
+                            </div>
+                            <p class="stat-value green">+${data.totalProfit.toFixed(2)} SOL</p>
+                            <p class="stat-sub">${((data.totalProfit / INITIAL_BALANCE) * 100).toFixed(1)}% ROI</p>
+                        </div>
 
-                <div class="transactions-card">
-                    <h2 class="chart-title">> RECENT TRANSACTIONS</h2>
-                    ${data.transactions.map(tx => `
-                        <div class="tx-item">
-                            <div class="tx-left">
-                                <span class="tx-icon">${tx.type === 'win' ? '📈' : '📉'}</span>
-                                <div>
-                                    <p class="tx-pair">${tx.pair}</p>
-                                    <p class="tx-time">${tx.time}</p>
+                        <div class="stat-card animate-slide" style="animation-delay: 0.25s;">
+                            <div class="stat-header">
+                                <span class="stat-label">Today's P&L</span>
+                                <span class="stat-icon">📊</span>
+                            </div>
+                            <p class="stat-value ${data.todayProfit >= 0 ? 'green' : 'red'}">
+                                ${data.todayProfit >= 0 ? '+' : ''}${data.todayProfit.toFixed(4)} SOL
+                            </p>
+                            <p class="stat-sub">${((data.todayProfit / INITIAL_BALANCE) * 100).toFixed(2)}% Daily</p>
+                        </div>
+
+                        <div class="stat-card animate-slide" style="animation-delay: 0.3s;">
+                            <div class="stat-header">
+                                <span class="stat-label">Win Rate</span>
+                                <span class="stat-icon">🎯</span>
+                            </div>
+                            <p class="stat-value">${data.winRate.toFixed(1)}%</p>
+                            <p class="stat-sub">Live Performance Metric</p>
+                        </div>
+                    </div>
+
+                    <div class="progress-card">
+                        <div class="progress-header">
+                            <span>📈 GROWTH PROGRESS</span>
+                            <span>${data.progressPercent.toFixed(1)}% Complete</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${data.progressPercent}%"></div>
+                        </div>
+                        <div class="progress-footer">
+                            <span>Start: ${INITIAL_BALANCE.toFixed(1)} SOL</span>
+                            <span class="green">Current: ${data.currentBalance.toFixed(2)} SOL</span>
+                            <span>Target: ${TARGET_BALANCE.toFixed(1)} SOL</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h2 class="chart-title">▬ Balance Trend (24 Hours)</h2>
+                        <canvas id="chart"></canvas>
+                    </div>
+
+                    <div class="transactions-card">
+                        <h2 class="chart-title">▬ Recent Transactions</h2>
+                        ${data.transactions.length > 0 ? data.transactions.map((tx, i) => `
+                            <div class="tx-item" style="animation: slideInUp 0.6s ease-out; animation-delay: ${0.6 + i * 0.05}s; animation-fill-mode: both;">
+                                <div class="tx-left">
+                                    <span class="tx-icon">${tx.type === 'win' ? '✓' : '✗'}</span>
+                                    <div>
+                                        <p class="tx-pair">${tx.pair}</p>
+                                        <p class="tx-time">${tx.time}</p>
+                                    </div>
+                                </div>
+                                <div class="tx-right">
+                                    <p class="tx-amount ${tx.type === 'win' ? 'green' : 'red'}">
+                                        ${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(4)} SOL
+                                    </p>
+                                    <p class="tx-type">${tx.type}</p>
                                 </div>
                             </div>
-                            <div class="tx-right">
-                                <p class="tx-amount ${tx.type === 'win' ? 'green' : 'red'}">
-                                    ${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(4)} SOL
-                                </p>
-                                <p class="tx-type">${tx.type.toUpperCase()}</p>
-                            </div>
-                        </div>
-                    `).join('')}
+                        `).join('') : '<p style="text-align: center; color: #606060; padding: 2rem;">No transactions yet</p>'}
+                    </div>
                 </div>
-            </div>
-        `;
-    }
+            `;
+        }
 
-    function drawChart() {
-        const canvas = document.getElementById('chart');
-        if (!canvas || !dashboardData) return;
-        
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width = canvas.offsetWidth;
-        const height = canvas.height = 300;
-        
-        ctx.clearRect(0, 0, width, height);
-        
-        const data = dashboardData.chartData;
-        const padding = 40;
-        const chartWidth = width - padding * 2;
-        const chartHeight = height - padding * 2;
-        
-        const values = data.map(d => d.balance);
-        const minVal = Math.min(...values) - 0.5;
-        const maxVal = Math.max(...values) + 0.5;
-        const range = maxVal - minVal;
-        
-        // Draw grid
-        ctx.strokeStyle = '#1a3a1a';
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= 5; i++) {
-            const y = padding + (chartHeight / 5) * i;
+        function drawChart() {
+            const canvas = document.getElementById('chart');
+            if (!canvas || !dashboardData) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = 300;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const data = dashboardData.chartData;
+            const padding = 40;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2;
+            
+            const values = data.map(d => d.balance);
+            const minVal = Math.min(...values) - 0.5;
+            const maxVal = Math.max(...values) + 0.5;
+            const range = maxVal - minVal;
+            
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Draw gradient fill
+            const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0.02)');
+            
             ctx.beginPath();
-            ctx.moveTo(padding, y);
-            ctx.lineTo(width - padding, y);
+            data.forEach((point, i) => {
+                const x = padding + (chartWidth / (data.length - 1)) * i;
+                const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.lineTo(width - padding, height - padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Draw line
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.5;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            
+            data.forEach((point, i) => {
+                const x = padding + (chartWidth / (data.length - 1)) * i;
+                const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            
             ctx.stroke();
+            ctx.shadowBlur = 0;
+            
+            // Draw points
+            data.forEach((point, i) => {
+                if (i % 4 === 0 || i === data.length - 1) {
+                    const x = padding + (chartWidth / (data.length - 1)) * i;
+                    const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    ctx.strokeStyle = '#0a0a0a';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+            
+            // Draw labels
+            ctx.fillStyle = '#808080';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(maxVal.toFixed(2), 5, padding + 10);
+            ctx.fillText(minVal.toFixed(2), 5, height - padding + 10);
         }
-        
-        // Draw line
-        ctx.strokeStyle = '#4ade80';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        
-        data.forEach((point, i) => {
-            const x = padding + (chartWidth / (data.length - 1)) * i;
-            const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
-            
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        });
-        
-        ctx.stroke();
-        
-        // Draw labels
-        ctx.fillStyle = '#4ade80';
-        ctx.font = '11px monospace';
-        ctx.fillText(maxVal.toFixed(2), 5, padding + 5);
-        ctx.fillText(minVal.toFixed(2), 5, height - padding + 5);
-    }
 
-    function handleLogin() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const errorContainer = document.getElementById('error-container');
-        
-        if (username === 'Groovy9944' && password === 'user39zxnlojp') {
-            isLoggedIn = true;
-            dashboardData = generateDashboardData();
-            render();
-            drawChart();
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorContainer = document.getElementById('error-container');
             
-            setInterval(() => {
-                dashboardData = generateDashboardData();
+            if (username === 'worklessgoat' && password === 'user39zxnlojp') {
+                isLoading = true;
                 render();
-                drawChart();
-            }, 30000);
-        } else {
-            errorContainer.innerHTML = '<div class="error-box">ERROR: Invalid credentials. No account available or incorrect password.</div>';
+                
+                setTimeout(() => {
+                    isLoading = false;
+                    isLoggedIn = true;
+                    dashboardData = generateDashboardData();
+                    render();
+                    drawChart();
+                    
+                    setInterval(() => {
+                        dashboardData = generateDashboardData();
+                        render();
+                        drawChart();
+                    }, 30000);
+                }, 4000);
+            } else {
+                errorContainer.innerHTML = '<div class="error-box">❌ Invalid credentials. Please try again.</div>';
+            }
         }
-    }
 
-    function render() {
-        document.getElementById('app').innerHTML = isLoggedIn ? renderDashboard() : renderLogin();
-    }
-
-    // Add enter key support
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !isLoggedIn) {
-            handleLogin();
+        function openWithdrawModal() {
+            showWithdrawModal = true;
+            render();
         }
-    });
 
-    // Initial render
-    render();
-</script>
-```
+        function closeWithdrawModal() {
+            showWithdrawModal = false;
+            render();
+        }
 
+        function processWithdrawal() {
+            const walletAddress = document.getElementById('wallet-address').value;
+            const amount = document.getElementById('withdraw-amount').value;
+            
+            if (!walletAddress || !amount) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            withdrawProcessing = true;
+            showWithdrawModal = false;
+            isLoading = true;
+            render();
+            
+            const loadingTexts = [
+                { text: 'PROCESSING WITHDRAWAL', sub: 'Validating wallet address...' },
+                { text: 'VERIFYING TRANSACTION', sub: 'Checking account balance...' },
+                { text: 'ANALYZING SECURITY', sub: 'Running security checks...' },
+                { text: 'FINALIZING REQUEST', sub: 'Processing almost complete...' }
+            ];
+            
+            let currentText = 0;
+            const textInterval = setInterval(() => {
+                if (currentText < loadingTexts.length - 1) {
+                    currentText++;
+                    document.querySelector('.loading-text').textContent = loadingTexts[currentText].text;
+                    document.querySelector('.loading-subtext').textContent = loadingTexts[currentText].sub;
+                }
+            }, 2000);
+            
+            setTimeout(() => {
+                clearInterval(textInterval);
+                isLoading = false;
+                withdrawProcessing = false;
+                showAlert = true;
+                render();
+            }, 8000);
+        }
+
+        function closeAlert() {
+            showAlert = false;
+            render();
+        }
+
+        function render() {
+            let content = '';
+            
+            if (isLoading) {
+                if (withdrawProcessing) {
+                    content = renderLoading('PROCESSING WITHDRAWAL', 'Validating wallet address...');
+                } else {
+                    content = renderLoading('AUTHENTICATING', 'Verifying credentials...');
+                }
+            } else if (showAlert) {
+                content = renderAlert();
+            } else if (showWithdrawModal) {
+                content = renderDashboard() + renderWithdrawModal();
+            } else if (isLoggedIn) {
+                content = renderDashboard();
+            } else {
+                content = renderLogin();
+            }
+            
+            document.getElementById('app').innerHTML = content;
+        }
+
+        // Add enter key support
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isLoggedIn && !isLoading) {
+                const username = document.getElementById('username');
+                const password = document.getElementById('password');
+                if (username && password) {
+                    handleLogin();
+                }
+            }
+        });
+
+        // Initial render
+        render();
+    </script>
 </body>
 </html>
