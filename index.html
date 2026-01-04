@@ -1,348 +1,521 @@
-import React, { useState, useEffect } from ‘react’;
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from ‘recharts’;
-import { TrendingUp, TrendingDown, Activity, Wallet, Target, Calendar } from ‘lucide-react’;
+<!DOCTYPE html>
 
-const GramVault = () => {
-const [isLoggedIn, setIsLoggedIn] = useState(false);
-const [username, setUsername] = useState(’’);
-const [password, setPassword] = useState(’’);
-const [error, setError] = useState(’’);
-const [dashboardData, setDashboardData] = useState(null);
-
-// Generate deterministic but realistic trading data based on time
-const generateDashboardData = () => {
-const now = Date.now();
-const startDate = new Date(‘2025-01-01T00:00:00Z’).getTime();
-const minutesPassed = Math.floor((now - startDate) / (1000 * 60));
-
-```
-// Target: 10 SOL -> 50 SOL in 12 days (40 SOL profit)
-// That's ~3.33 SOL profit per day, or ~0.139 SOL per hour
-const baseProfit = minutesPassed * 0.00231; // ~0.139 SOL per hour
-
-// Add some realistic volatility using sine waves with different periods
-const volatility1 = Math.sin(minutesPassed / 120) * 0.3;
-const volatility2 = Math.sin(minutesPassed / 47) * 0.15;
-const volatility3 = Math.sin(minutesPassed / 89) * 0.08;
-
-const totalProfit = baseProfit + volatility1 + volatility2 + volatility3;
-const currentBalance = 10 + totalProfit;
-
-// Generate chart data for the last 24 hours
-const chartData = [];
-for (let i = 24; i >= 0; i--) {
-  const timeOffset = i * 60; // hours to minutes
-  const pastMinutes = minutesPassed - timeOffset;
-  const pastProfit = pastMinutes * 0.00231;
-  const pastVol1 = Math.sin(pastMinutes / 120) * 0.3;
-  const pastVol2 = Math.sin(pastMinutes / 47) * 0.15;
-  const pastVol3 = Math.sin(pastMinutes / 89) * 0.08;
-  const pastBalance = 10 + pastProfit + pastVol1 + pastVol2 + pastVol3;
-  
-  chartData.push({
-    time: i === 0 ? 'Now' : `${i}h ago`,
-    balance: Math.max(10, pastBalance)
-  });
-}
-
-// Generate realistic transactions
-const transactions = [];
-const tradeInterval = 180; // One trade every ~3 hours
-const numTrades = Math.floor(minutesPassed / tradeInterval);
-
-for (let i = 0; i < Math.min(numTrades, 15); i++) {
-  const tradeTime = minutesPassed - (i * tradeInterval);
-  const isWin = Math.sin(tradeTime * 0.1) > -0.2; // ~70% win rate
-  const amount = 0.5 + Math.abs(Math.sin(tradeTime * 0.3)) * 2;
-  const date = new Date(now - (i * tradeInterval * 60 * 1000));
-  
-  transactions.push({
-    id: `TX${tradeTime}`,
-    type: isWin ? 'win' : 'loss',
-    pair: ['SOL/USDC', 'SOL/ETH', 'SOL/BTC'][Math.floor(Math.abs(Math.sin(tradeTime)) * 3)],
-    amount: isWin ? amount : -amount,
-    time: date.toLocaleString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
-  });
-}
-
-// Calculate day progress (12-day goal)
-const daysPassed = minutesPassed / (60 * 24);
-const progressPercent = Math.min((daysPassed / 12) * 100, 100);
-
-// Calculate today's profit
-const startOfDay = new Date(now);
-startOfDay.setHours(0, 0, 0, 0);
-const minutesTodayPassed = Math.floor((now - startOfDay.getTime()) / (1000 * 60));
-const todayProfit = minutesTodayPassed * 0.00231 + 
-                    Math.sin(minutesPassed / 120) * 0.2 + 
-                    Math.sin(minutesPassed / 47) * 0.1;
-
-return {
-  currentBalance,
-  totalProfit,
-  todayProfit,
-  chartData: chartData.reverse(),
-  transactions,
-  progressPercent,
-  daysPassed: daysPassed.toFixed(1),
-  winRate: 68 + Math.sin(minutesPassed / 500) * 5
-};
-```
-
-};
-
-useEffect(() => {
-if (isLoggedIn) {
-setDashboardData(generateDashboardData());
-const interval = setInterval(() => {
-setDashboardData(generateDashboardData());
-}, 30000); // Update every 30 seconds
-return () => clearInterval(interval);
-}
-}, [isLoggedIn]);
-
-const handleLogin = (e) => {
-e.preventDefault();
-if (username === ‘Groovy9944’ && password === ‘user39zxnlojp’) {
-setError(’’);
-setIsLoggedIn(true);
-} else {
-setError(‘Invalid credentials. No account available or incorrect password.’);
-}
-};
-
-if (!isLoggedIn) {
-return (
-<div className="min-h-screen bg-black flex items-center justify-center p-4 font-mono">
-<div className="w-full max-w-md">
-<div className="text-center mb-8">
-<h1 className="text-4xl font-bold text-green-400 mb-2">GRAMVAULT</h1>
-<p className="text-gray-500 text-sm">// SECURE TRADING TERMINAL</p>
-</div>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAMVAULT - Trading Terminal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #000; 
+            color: #4ade80; 
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+        }
+        .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
 
 ```
-      <div className="bg-zinc-900 border border-green-900/30 rounded p-8">
-        <div className="space-y-6">
-          <div>
-            <label className="block text-green-400 text-sm mb-2">
-              {'>'} USERNAME
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-black border border-green-900/50 text-green-400 px-4 py-3 rounded focus:outline-none focus:border-green-500 placeholder-gray-700"
-              placeholder="Enter username..."
-            />
-          </div>
-          
-          <div>
-            <label className="block text-green-400 text-sm mb-2">
-              {'>'} PASSWORD
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleLogin(e)}
-              className="w-full bg-black border border-green-900/50 text-green-400 px-4 py-3 rounded focus:outline-none focus:border-green-500 placeholder-gray-700"
-              placeholder="Enter password..."
-            />
-          </div>
-          
-          {error && (
-            <div className="bg-red-950/30 border border-red-900/50 text-red-400 px-4 py-3 rounded text-sm">
-              ERROR: {error}
+    /* Login Page */
+    .login-wrapper { 
+        min-height: 100vh; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        padding: 1rem; 
+    }
+    .login-box { width: 100%; max-width: 28rem; }
+    .login-title { 
+        font-size: 2.5rem; 
+        font-weight: bold; 
+        color: #4ade80; 
+        text-align: center; 
+        margin-bottom: 0.5rem; 
+    }
+    .login-subtitle { 
+        color: #6b7280; 
+        font-size: 0.875rem; 
+        text-align: center; 
+        margin-bottom: 2rem; 
+    }
+    .login-form { 
+        background: #18181b; 
+        border: 1px solid rgba(34, 197, 94, 0.3); 
+        border-radius: 0.5rem; 
+        padding: 2rem; 
+    }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label { 
+        display: block; 
+        color: #4ade80; 
+        font-size: 0.875rem; 
+        margin-bottom: 0.5rem; 
+    }
+    .form-input { 
+        width: 100%; 
+        background: #000; 
+        border: 1px solid rgba(34, 197, 94, 0.5); 
+        color: #4ade80; 
+        padding: 0.75rem 1rem; 
+        border-radius: 0.375rem; 
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+    }
+    .form-input:focus { 
+        outline: none; 
+        border-color: #22c55e; 
+    }
+    .form-input::placeholder { color: #374151; }
+    .error-box { 
+        background: rgba(127, 29, 29, 0.3); 
+        border: 1px solid rgba(153, 27, 27, 0.5); 
+        color: #f87171; 
+        padding: 0.75rem 1rem; 
+        border-radius: 0.375rem; 
+        font-size: 0.875rem; 
+        margin-bottom: 1.5rem; 
+    }
+    .btn-login { 
+        width: 100%; 
+        background: #16a34a; 
+        color: #000; 
+        font-weight: bold; 
+        padding: 0.75rem; 
+        border: none; 
+        border-radius: 0.375rem; 
+        cursor: pointer; 
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        transition: background 0.2s;
+    }
+    .btn-login:hover { background: #22c55e; }
+    .system-status { 
+        text-align: center; 
+        margin-top: 1.5rem; 
+        color: #4b5563; 
+        font-size: 0.75rem; 
+    }
+    
+    /* Dashboard */
+    .header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 2rem; 
+        padding-bottom: 1rem; 
+        border-bottom: 1px solid rgba(34, 197, 94, 0.3); 
+    }
+    .header-title { font-size: 1.875rem; font-weight: bold; }
+    .header-subtitle { color: #6b7280; font-size: 0.875rem; }
+    .user-info { text-align: right; font-size: 0.875rem; color: #6b7280; }
+    
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+        gap: 1rem; 
+        margin-bottom: 2rem; 
+    }
+    .stat-card { 
+        background: #18181b; 
+        border: 1px solid rgba(34, 197, 94, 0.3); 
+        border-radius: 0.5rem; 
+        padding: 1rem; 
+    }
+    .stat-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 0.5rem; 
+    }
+    .stat-label { color: #6b7280; font-size: 0.875rem; }
+    .stat-value { font-size: 1.5rem; font-weight: bold; }
+    .stat-sub { color: #4b5563; font-size: 0.75rem; margin-top: 0.25rem; }
+    
+    .progress-card { 
+        background: #18181b; 
+        border: 1px solid rgba(34, 197, 94, 0.3); 
+        border-radius: 0.5rem; 
+        padding: 1.5rem; 
+        margin-bottom: 2rem; 
+    }
+    .progress-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 1rem; 
+        font-size: 0.875rem; 
+    }
+    .progress-bar-bg { 
+        width: 100%; 
+        background: #000; 
+        border-radius: 9999px; 
+        height: 1rem; 
+        margin-bottom: 0.75rem; 
+    }
+    .progress-bar-fill { 
+        background: linear-gradient(to right, #16a34a, #4ade80); 
+        height: 1rem; 
+        border-radius: 9999px; 
+        transition: width 1s ease; 
+    }
+    .progress-footer { 
+        display: flex; 
+        justify-content: space-between; 
+        font-size: 0.875rem; 
+    }
+    
+    .chart-card { 
+        background: #18181b; 
+        border: 1px solid rgba(34, 197, 94, 0.3); 
+        border-radius: 0.5rem; 
+        padding: 1.5rem; 
+        margin-bottom: 2rem; 
+    }
+    .chart-title { font-size: 1.125rem; margin-bottom: 1rem; }
+    
+    .transactions-card { 
+        background: #18181b; 
+        border: 1px solid rgba(34, 197, 94, 0.3); 
+        border-radius: 0.5rem; 
+        padding: 1.5rem; 
+    }
+    .tx-item { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        background: #000; 
+        border: 1px solid rgba(34, 197, 94, 0.2); 
+        border-radius: 0.375rem; 
+        padding: 0.75rem; 
+        margin-bottom: 0.5rem; 
+    }
+    .tx-item:hover { border-color: rgba(34, 197, 94, 0.5); }
+    .tx-left { display: flex; align-items: center; gap: 0.75rem; }
+    .tx-icon { width: 1rem; height: 1rem; }
+    .tx-pair { font-size: 0.875rem; font-weight: bold; }
+    .tx-time { color: #4b5563; font-size: 0.75rem; }
+    .tx-right { text-align: right; }
+    .tx-amount { font-size: 0.875rem; font-weight: bold; }
+    .tx-type { color: #4b5563; font-size: 0.75rem; }
+    
+    .green { color: #4ade80; }
+    .red { color: #f87171; }
+    
+    canvas { width: 100%; height: 300px; }
+    
+    @media (max-width: 768px) {
+        .stats-grid { grid-template-columns: 1fr; }
+        .header { flex-direction: column; gap: 1rem; text-align: center; }
+        .user-info { text-align: center; }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div id="app"></div>
+
+```
+<script>
+    let isLoggedIn = false;
+    let dashboardData = null;
+
+    function generateDashboardData() {
+        const now = Date.now();
+        const startDate = new Date('2025-01-01T00:00:00Z').getTime();
+        const minutesPassed = Math.floor((now - startDate) / (1000 * 60));
+        
+        const baseProfit = minutesPassed * 0.00231;
+        const volatility1 = Math.sin(minutesPassed / 120) * 0.3;
+        const volatility2 = Math.sin(minutesPassed / 47) * 0.15;
+        const volatility3 = Math.sin(minutesPassed / 89) * 0.08;
+        
+        const totalProfit = baseProfit + volatility1 + volatility2 + volatility3;
+        const currentBalance = 10 + totalProfit;
+        
+        const chartData = [];
+        for (let i = 24; i >= 0; i--) {
+            const timeOffset = i * 60;
+            const pastMinutes = minutesPassed - timeOffset;
+            const pastProfit = pastMinutes * 0.00231;
+            const pastVol1 = Math.sin(pastMinutes / 120) * 0.3;
+            const pastVol2 = Math.sin(pastMinutes / 47) * 0.15;
+            const pastVol3 = Math.sin(pastMinutes / 89) * 0.08;
+            const pastBalance = 10 + pastProfit + pastVol1 + pastVol2 + pastVol3;
+            
+            chartData.push({
+                time: i === 0 ? 'Now' : i + 'h',
+                balance: Math.max(10, pastBalance)
+            });
+        }
+        
+        const transactions = [];
+        const tradeInterval = 180;
+        const numTrades = Math.floor(minutesPassed / tradeInterval);
+        
+        for (let i = 0; i < Math.min(numTrades, 15); i++) {
+            const tradeTime = minutesPassed - (i * tradeInterval);
+            const isWin = Math.sin(tradeTime * 0.1) > -0.2;
+            const amount = 0.5 + Math.abs(Math.sin(tradeTime * 0.3)) * 2;
+            const date = new Date(now - (i * tradeInterval * 60 * 1000));
+            
+            transactions.push({
+                id: 'TX' + tradeTime,
+                type: isWin ? 'win' : 'loss',
+                pair: ['SOL/USDC', 'SOL/ETH', 'SOL/BTC'][Math.floor(Math.abs(Math.sin(tradeTime)) * 3)],
+                amount: isWin ? amount : -amount,
+                time: date.toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                })
+            });
+        }
+        
+        const daysPassed = minutesPassed / (60 * 24);
+        const progressPercent = Math.min((daysPassed / 12) * 100, 100);
+        
+        const startOfDay = new Date(now);
+        startOfDay.setHours(0, 0, 0, 0);
+        const minutesTodayPassed = Math.floor((now - startOfDay.getTime()) / (1000 * 60));
+        const todayProfit = minutesTodayPassed * 0.00231 + 
+                            Math.sin(minutesPassed / 120) * 0.2 + 
+                            Math.sin(minutesPassed / 47) * 0.1;
+        
+        return {
+            currentBalance,
+            totalProfit,
+            todayProfit,
+            chartData,
+            transactions,
+            progressPercent,
+            daysPassed: daysPassed.toFixed(1),
+            winRate: 68 + Math.sin(minutesPassed / 500) * 5
+        };
+    }
+
+    function renderLogin() {
+        return `
+            <div class="login-wrapper">
+                <div class="login-box">
+                    <h1 class="login-title">GRAMVAULT</h1>
+                    <p class="login-subtitle">// SECURE TRADING TERMINAL</p>
+                    
+                    <div class="login-form">
+                        <div class="form-group">
+                            <label class="form-label">> USERNAME</label>
+                            <input type="text" id="username" class="form-input" placeholder="Enter username...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">> PASSWORD</label>
+                            <input type="password" id="password" class="form-input" placeholder="Enter password...">
+                        </div>
+                        
+                        <div id="error-container"></div>
+                        
+                        <button class="btn-login" onclick="handleLogin()">>> LOGIN</button>
+                    </div>
+                    
+                    <div class="system-status">
+                        <p>SYSTEM STATUS: ONLINE</p>
+                        <p style="margin-top: 0.25rem;">ENCRYPTED CONNECTION: ACTIVE</p>
+                    </div>
+                </div>
             </div>
-          )}
-          
-          <button
-            onClick={handleLogin}
-            className="w-full bg-green-600 hover:bg-green-500 text-black font-bold py-3 rounded transition-colors"
-          >
-            {'>> LOGIN'}
-          </button>
-        </div>
-      </div>
-      
-      <div className="text-center mt-6 text-gray-600 text-xs">
-        <p>SYSTEM STATUS: ONLINE</p>
-        <p className="mt-1">ENCRYPTED CONNECTION: ACTIVE</p>
-      </div>
-    </div>
-  </div>
-);
-```
+        `;
+    }
 
-}
+    function renderDashboard() {
+        const data = dashboardData;
+        
+        return `
+            <div class="container">
+                <div class="header">
+                    <div>
+                        <h1 class="header-title">GRAMVAULT</h1>
+                        <p class="header-subtitle">// TRADING DASHBOARD</p>
+                    </div>
+                    <div class="user-info">
+                        <p>USER: Groovy9944</p>
+                        <p style="font-size: 0.75rem; color: #4b5563;">${new Date().toLocaleString()}</p>
+                    </div>
+                </div>
 
-if (!dashboardData) return null;
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">CURRENT BALANCE</span>
+                            <span>💰</span>
+                        </div>
+                        <p class="stat-value">${data.currentBalance.toFixed(4)} SOL</p>
+                        <p class="stat-sub">INITIAL: 10.0000 SOL</p>
+                    </div>
 
-return (
-<div className="min-h-screen bg-black text-green-400 font-mono p-6">
-<div className="max-w-7xl mx-auto">
-{/* Header */}
-<div className="flex items-center justify-between mb-8 pb-4 border-b border-green-900/30">
-<div>
-<h1 className="text-3xl font-bold">GRAMVAULT</h1>
-<p className="text-gray-500 text-sm">// TRADING DASHBOARD</p>
-</div>
-<div className="text-right">
-<p className="text-sm text-gray-500">USER: {username}</p>
-<p className="text-xs text-gray-600">{new Date().toLocaleString()}</p>
-</div>
-</div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">TODAY'S P&L</span>
+                            <span>${data.todayProfit >= 0 ? '📈' : '📉'}</span>
+                        </div>
+                        <p class="stat-value ${data.todayProfit >= 0 ? 'green' : 'red'}">
+                            ${data.todayProfit >= 0 ? '+' : ''}${data.todayProfit.toFixed(4)} SOL
+                        </p>
+                        <p class="stat-sub">${((data.todayProfit / 10) * 100).toFixed(2)}% DAILY</p>
+                    </div>
 
-```
-    {/* Stats Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div className="bg-zinc-900 border border-green-900/30 rounded p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-gray-500 text-sm">CURRENT BALANCE</span>
-          <Wallet className="w-4 h-4 text-green-500" />
-        </div>
-        <p className="text-2xl font-bold">{dashboardData.currentBalance.toFixed(4)} SOL</p>
-        <p className="text-xs text-gray-600 mt-1">INITIAL: 10.0000 SOL</p>
-      </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">TOTAL PROFIT</span>
+                            <span>📊</span>
+                        </div>
+                        <p class="stat-value green">+${data.totalProfit.toFixed(4)} SOL</p>
+                        <p class="stat-sub">${((data.totalProfit / 10) * 100).toFixed(2)}% ROI</p>
+                    </div>
 
-      <div className="bg-zinc-900 border border-green-900/30 rounded p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-gray-500 text-sm">TODAY'S P&L</span>
-          {dashboardData.todayProfit >= 0 ? 
-            <TrendingUp className="w-4 h-4 text-green-500" /> : 
-            <TrendingDown className="w-4 h-4 text-red-500" />
-          }
-        </div>
-        <p className={`text-2xl font-bold ${dashboardData.todayProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-          {dashboardData.todayProfit >= 0 ? '+' : ''}{dashboardData.todayProfit.toFixed(4)} SOL
-        </p>
-        <p className="text-xs text-gray-600 mt-1">
-          {((dashboardData.todayProfit / 10) * 100).toFixed(2)}% DAILY
-        </p>
-      </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">WIN RATE</span>
+                            <span>🎯</span>
+                        </div>
+                        <p class="stat-value">${data.winRate.toFixed(1)}%</p>
+                        <p class="stat-sub">LIVE PERFORMANCE</p>
+                    </div>
+                </div>
 
-      <div className="bg-zinc-900 border border-green-900/30 rounded p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-gray-500 text-sm">TOTAL PROFIT</span>
-          <Activity className="w-4 h-4 text-green-500" />
-        </div>
-        <p className="text-2xl font-bold text-green-400">
-          +{dashboardData.totalProfit.toFixed(4)} SOL
-        </p>
-        <p className="text-xs text-gray-600 mt-1">
-          {((dashboardData.totalProfit / 10) * 100).toFixed(2)}% ROI
-        </p>
-      </div>
+                <div class="progress-card">
+                    <div class="progress-header">
+                        <span>📅 12-DAY GOAL PROGRESS</span>
+                        <span style="color: #6b7280;">DAY ${data.daysPassed} / 12</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${data.progressPercent}%"></div>
+                    </div>
+                    <div class="progress-footer">
+                        <span>START: 10 SOL</span>
+                        <span class="green">CURRENT: ${data.currentBalance.toFixed(2)} SOL</span>
+                        <span>TARGET: 50 SOL</span>
+                    </div>
+                </div>
 
-      <div className="bg-zinc-900 border border-green-900/30 rounded p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-gray-500 text-sm">WIN RATE</span>
-          <Target className="w-4 h-4 text-green-500" />
-        </div>
-        <p className="text-2xl font-bold">{dashboardData.winRate.toFixed(1)}%</p>
-        <p className="text-xs text-gray-600 mt-1">LIVE PERFORMANCE</p>
-      </div>
-    </div>
+                <div class="chart-card">
+                    <h2 class="chart-title">> BALANCE TREND (24H)</h2>
+                    <canvas id="chart"></canvas>
+                </div>
 
-    {/* Goal Progress */}
-    <div className="bg-zinc-900 border border-green-900/30 rounded p-6 mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-green-500" />
-          <span className="text-sm">12-DAY GOAL PROGRESS</span>
-        </div>
-        <span className="text-sm text-gray-500">
-          DAY {dashboardData.daysPassed} / 12
-        </span>
-      </div>
-      <div className="w-full bg-black rounded-full h-4 mb-3">
-        <div 
-          className="bg-gradient-to-r from-green-600 to-green-400 h-4 rounded-full transition-all duration-1000"
-          style={{ width: `${dashboardData.progressPercent}%` }}
-        />
-      </div>
-      <div className="flex justify-between text-sm">
-        <span>START: 10 SOL</span>
-        <span className="text-green-400">CURRENT: {dashboardData.currentBalance.toFixed(2)} SOL</span>
-        <span>TARGET: 50 SOL</span>
-      </div>
-    </div>
-
-    {/* Chart */}
-    <div className="bg-zinc-900 border border-green-900/30 rounded p-6 mb-8">
-      <h2 className="text-lg mb-4">{'>'} BALANCE TREND (24H)</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={dashboardData.chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1a3a1a" />
-          <XAxis 
-            dataKey="time" 
-            stroke="#4ade80" 
-            tick={{ fill: '#4ade80', fontSize: 11 }}
-          />
-          <YAxis 
-            stroke="#4ade80" 
-            tick={{ fill: '#4ade80', fontSize: 11 }}
-            domain={['dataMin - 0.5', 'dataMax + 0.5']}
-          />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: '#000', 
-              border: '1px solid #4ade80',
-              borderRadius: '4px',
-              fontFamily: 'monospace'
-            }}
-            labelStyle={{ color: '#4ade80' }}
-          />
-          <Line 
-            type="monotone" 
-            dataKey="balance" 
-            stroke="#4ade80" 
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-
-    {/* Transactions */}
-    <div className="bg-zinc-900 border border-green-900/30 rounded p-6">
-      <h2 className="text-lg mb-4">{'>'} RECENT TRANSACTIONS</h2>
-      <div className="space-y-2">
-        {dashboardData.transactions.map((tx) => (
-          <div 
-            key={tx.id}
-            className="flex items-center justify-between bg-black border border-green-900/20 rounded p-3 hover:border-green-900/50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              {tx.type === 'win' ? 
-                <TrendingUp className="w-4 h-4 text-green-500" /> : 
-                <TrendingDown className="w-4 h-4 text-red-500" />
-              }
-              <div>
-                <p className="text-sm font-bold">{tx.pair}</p>
-                <p className="text-xs text-gray-600">{tx.time}</p>
-              </div>
+                <div class="transactions-card">
+                    <h2 class="chart-title">> RECENT TRANSACTIONS</h2>
+                    ${data.transactions.map(tx => `
+                        <div class="tx-item">
+                            <div class="tx-left">
+                                <span class="tx-icon">${tx.type === 'win' ? '📈' : '📉'}</span>
+                                <div>
+                                    <p class="tx-pair">${tx.pair}</p>
+                                    <p class="tx-time">${tx.time}</p>
+                                </div>
+                            </div>
+                            <div class="tx-right">
+                                <p class="tx-amount ${tx.type === 'win' ? 'green' : 'red'}">
+                                    ${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(4)} SOL
+                                </p>
+                                <p class="tx-type">${tx.type.toUpperCase()}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
-            <div className="text-right">
-              <p className={`text-sm font-bold ${tx.type === 'win' ? 'text-green-400' : 'text-red-400'}`}>
-                {tx.amount >= 0 ? '+' : ''}{tx.amount.toFixed(4)} SOL
-              </p>
-              <p className="text-xs text-gray-600">{tx.type.toUpperCase()}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-</div>
+        `;
+    }
+
+    function drawChart() {
+        const canvas = document.getElementById('chart');
+        if (!canvas || !dashboardData) return;
+        
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width = canvas.offsetWidth;
+        const height = canvas.height = 300;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        const data = dashboardData.chartData;
+        const padding = 40;
+        const chartWidth = width - padding * 2;
+        const chartHeight = height - padding * 2;
+        
+        const values = data.map(d => d.balance);
+        const minVal = Math.min(...values) - 0.5;
+        const maxVal = Math.max(...values) + 0.5;
+        const range = maxVal - minVal;
+        
+        // Draw grid
+        ctx.strokeStyle = '#1a3a1a';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = padding + (chartHeight / 5) * i;
+            ctx.beginPath();
+            ctx.moveTo(padding, y);
+            ctx.lineTo(width - padding, y);
+            ctx.stroke();
+        }
+        
+        // Draw line
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        data.forEach((point, i) => {
+            const x = padding + (chartWidth / (data.length - 1)) * i;
+            const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
+            
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        
+        ctx.stroke();
+        
+        // Draw labels
+        ctx.fillStyle = '#4ade80';
+        ctx.font = '11px monospace';
+        ctx.fillText(maxVal.toFixed(2), 5, padding + 5);
+        ctx.fillText(minVal.toFixed(2), 5, height - padding + 5);
+    }
+
+    function handleLogin() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorContainer = document.getElementById('error-container');
+        
+        if (username === 'Groovy9944' && password === 'user39zxnlojp') {
+            isLoggedIn = true;
+            dashboardData = generateDashboardData();
+            render();
+            drawChart();
+            
+            setInterval(() => {
+                dashboardData = generateDashboardData();
+                render();
+                drawChart();
+            }, 30000);
+        } else {
+            errorContainer.innerHTML = '<div class="error-box">ERROR: Invalid credentials. No account available or incorrect password.</div>';
+        }
+    }
+
+    function render() {
+        document.getElementById('app').innerHTML = isLoggedIn ? renderDashboard() : renderLogin();
+    }
+
+    // Add enter key support
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !isLoggedIn) {
+            handleLogin();
+        }
+    });
+
+    // Initial render
+    render();
+</script>
 ```
 
-);
-};
-
-export default GramVault;
+</body>
+</html>
