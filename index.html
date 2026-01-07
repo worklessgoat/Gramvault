@@ -1,1261 +1,310 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAMVAULT - Trading Terminal</title>
+    <title>GRAMVAULT</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
 
-```
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body { 
-        background: #000;
-        color: #fff;
-        font-family: 'Orbitron', monospace;
-        min-height: 100vh;
-        overflow-x: hidden;
-        position: relative;
-    }
-    
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: 
-            radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: 0;
-    }
-    
-    .scan-line {
-        position: fixed;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-        animation: scan 4s linear infinite;
-        z-index: 1;
-        pointer-events: none;
-    }
-    
-    @keyframes scan {
-        0% { top: -2px; }
-        100% { top: 100%; }
-    }
-    
-    .container { 
-        max-width: 1400px; 
-        margin: 0 auto; 
-        padding: 2rem;
-        position: relative;
-        z-index: 2;
-    }
-    
-    /* Holographic Effects */
-    .holo {
-        background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.05) 50%,
-            rgba(255, 255, 255, 0.1) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 
-            0 0 20px rgba(255, 255, 255, 0.1),
-            inset 0 0 20px rgba(255, 255, 255, 0.05);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .holo::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: linear-gradient(
-            45deg,
-            transparent 30%,
-            rgba(255, 255, 255, 0.1) 50%,
-            transparent 70%
-        );
-        animation: holoShine 3s linear infinite;
-    }
-    
-    @keyframes holoShine {
-        0% { transform: rotate(0deg) translate(-50%, -50%); }
-        100% { transform: rotate(360deg) translate(-50%, -50%); }
-    }
-    
-    .holo-text {
-        text-shadow: 
-            0 0 10px rgba(255, 255, 255, 0.8),
-            0 0 20px rgba(255, 255, 255, 0.6),
-            0 0 30px rgba(255, 255, 255, 0.4),
-            0 0 40px rgba(255, 255, 255, 0.2);
-        animation: textGlow 2s ease-in-out infinite alternate;
-    }
-    
-    @keyframes textGlow {
-        from { 
-            text-shadow: 
-                0 0 10px rgba(255, 255, 255, 0.8),
-                0 0 20px rgba(255, 255, 255, 0.6),
-                0 0 30px rgba(255, 255, 255, 0.4);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background: #000;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
-        to { 
-            text-shadow: 
-                0 0 20px rgba(255, 255, 255, 1),
-                0 0 30px rgba(255, 255, 255, 0.8),
-                0 0 40px rgba(255, 255, 255, 0.6),
-                0 0 50px rgba(255, 255, 255, 0.4);
-        }
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(-50px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.8; transform: scale(1.05); }
-    }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    
-    @keyframes shimmer {
-        0% { background-position: -1000px 0; }
-        100% { background-position: 1000px 0; }
-    }
-    
-    @keyframes slideUp {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-    
-    @keyframes flicker {
-        0%, 100% { opacity: 1; }
-        41%, 43% { opacity: 0.8; }
-        45%, 47% { opacity: 0.9; }
-    }
-    
-    .animate-in { animation: fadeIn 0.8s ease-out; }
-    .animate-slide { animation: slideIn 0.8s ease-out; }
-    
-    /* Loading Screen */
-    .loading-screen {
-        position: fixed;
-        inset: 0;
-        background: #000;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-    
-    .loading-spinner {
-        width: 80px;
-        height: 80px;
-        border: 3px solid rgba(255, 255, 255, 0.1);
-        border-top: 3px solid #fff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-        margin-bottom: 2rem;
-    }
-    
-    .loading-text {
-        font-size: 1.5rem;
-        font-weight: 700;
-        letter-spacing: 4px;
-        animation: flicker 3s infinite;
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-    }
-    
-    .loading-subtext {
-        font-size: 0.875rem;
-        color: rgba(255, 255, 255, 0.6);
-        margin-top: 1rem;
-        letter-spacing: 2px;
-    }
-    
-    .loading-bar {
-        width: 300px;
-        height: 3px;
-        background: rgba(255, 255, 255, 0.1);
-        overflow: hidden;
-        margin-top: 2rem;
-        border-radius: 2px;
-    }
-    
-    .loading-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, transparent, #fff, transparent);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    }
-    
-    /* Login Page */
-    .login-wrapper { 
-        min-height: 100vh; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        padding: 2rem;
-    }
-    
-    .login-box { 
-        width: 100%; 
-        max-width: 500px; 
-        animation: fadeIn 1s ease-out;
-    }
-    
-    .login-title { 
-        font-size: 4rem; 
-        font-weight: 900; 
-        text-align: center; 
-        margin-bottom: 1rem;
-        letter-spacing: 8px;
-        animation: textGlow 2s ease-in-out infinite alternate;
-    }
-    
-    .login-subtitle { 
-        color: rgba(255, 255, 255, 0.6); 
-        font-size: 0.875rem; 
-        text-align: center; 
-        margin-bottom: 3rem;
-        letter-spacing: 3px;
-        font-weight: 300;
-    }
-    
-    .login-form { 
-        padding: 3rem;
-        border-radius: 1rem;
-        backdrop-filter: blur(20px);
-    }
-    
-    .form-group { margin-bottom: 2rem; }
-    
-    .form-label { 
-        display: block; 
-        font-size: 0.75rem; 
-        margin-bottom: 0.75rem;
-        letter-spacing: 3px;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    
-    .form-input { 
-        width: 100%; 
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #fff; 
-        padding: 1rem 1.5rem; 
-        border-radius: 0.5rem; 
-        font-family: 'Orbitron', monospace;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        letter-spacing: 2px;
-        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
-    }
-    
-    .form-input:focus { 
-        outline: none; 
-        border-color: #fff;
-        box-shadow: 
-            0 0 20px rgba(255, 255, 255, 0.3),
-            inset 0 0 20px rgba(255, 255, 255, 0.1);
-    }
-    
-    .form-input::placeholder { 
-        color: rgba(255, 255, 255, 0.3);
-        letter-spacing: 1px;
-    }
-    
-    .error-box { 
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #fff;
-        padding: 1rem 1.5rem; 
-        border-radius: 0.5rem; 
-        font-size: 0.875rem; 
-        margin-bottom: 2rem;
-        animation: slideUp 0.3s ease-out;
-        letter-spacing: 1px;
-    }
-    
-    .btn-login { 
-        width: 100%; 
-        background: #fff;
-        color: #000; 
-        font-weight: 800; 
-        padding: 1.25rem; 
-        border: none; 
-        border-radius: 0.5rem; 
-        cursor: pointer; 
-        font-family: 'Orbitron', monospace;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-    }
-    
-    .btn-login:hover { 
-        transform: translateY(-3px);
-        box-shadow: 0 10px 40px rgba(255, 255, 255, 0.6);
-    }
-    
-    .btn-login:active { 
-        transform: translateY(0);
-    }
-    
-    .system-status { 
-        text-align: center; 
-        margin-top: 2rem; 
-        color: rgba(255, 255, 255, 0.4);
-        font-size: 0.75rem;
-        letter-spacing: 2px;
-    }
-    
-    /* Dashboard */
-    .header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 3rem; 
-        padding-bottom: 1.5rem; 
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .header-title { 
-        font-size: 2.5rem; 
-        font-weight: 900;
-        letter-spacing: 6px;
-        animation: textGlow 2s ease-in-out infinite alternate;
-    }
-    
-    .header-subtitle { 
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.75rem;
-        letter-spacing: 3px;
-        margin-top: 0.5rem;
-    }
-    
-    .user-info { 
-        text-align: right; 
-        font-size: 0.875rem; 
-        color: rgba(255, 255, 255, 0.7);
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-    
-    .btn-withdraw {
-        background: #fff;
-        color: #000;
-        font-weight: 800;
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-family: 'Orbitron', monospace;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        font-size: 0.875rem;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-    }
-    
-    .btn-withdraw:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.6);
-    }
-    
-    .stats-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-        gap: 1.5rem; 
-        margin-bottom: 3rem; 
-    }
-    
-    .stat-card { 
-        padding: 2rem;
-        border-radius: 1rem;
-        transition: all 0.4s ease;
-        backdrop-filter: blur(20px);
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 
-            0 0 40px rgba(255, 255, 255, 0.3),
-            inset 0 0 30px rgba(255, 255, 255, 0.1);
-    }
-    
-    .stat-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 1.5rem; 
-    }
-    
-    .stat-label { 
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: 600;
-        opacity: 0.7;
-    }
-    
-    .stat-icon {
-        font-size: 1.5rem;
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-    }
-    
-    .stat-value { 
-        font-size: 2rem; 
-        font-weight: 900;
-        letter-spacing: 2px;
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-    }
-    
-    .stat-sub { 
-        font-size: 0.75rem;
-        margin-top: 0.75rem;
-        opacity: 0.6;
-        letter-spacing: 1px;
-    }
-    
-    .progress-card { 
-        padding: 2rem;
-        border-radius: 1rem;
-        margin-bottom: 3rem;
-        backdrop-filter: blur(20px);
-    }
-    
-    .progress-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 1.5rem; 
-        font-size: 0.875rem;
-        letter-spacing: 2px;
-    }
-    
-    .progress-bar-bg { 
-        width: 100%; 
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 9999px; 
-        height: 1.5rem; 
-        margin-bottom: 1.5rem;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .progress-bar-fill { 
-        background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.6), #fff);
-        height: 1.5rem; 
-        border-radius: 9999px; 
-        transition: width 1s ease;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-        animation: shimmer 3s infinite;
-        background-size: 200% 100%;
-    }
-    
-    .progress-footer { 
-        display: flex; 
-        justify-content: space-between; 
-        font-size: 0.875rem;
-        letter-spacing: 1px;
-    }
-    
-    .chart-card { 
-        padding: 2rem;
-        border-radius: 1rem;
-        margin-bottom: 3rem;
-        backdrop-filter: blur(20px);
-    }
-    
-    .chart-title { 
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        font-weight: 700;
-    }
-    
-    .transactions-card { 
-        padding: 2rem;
-        border-radius: 1rem;
-        backdrop-filter: blur(20px);
-    }
-    
-    .tx-item { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 0.75rem; 
-        padding: 1.25rem; 
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-    }
-    
-    .tx-item:hover { 
-        border-color: rgba(255, 255, 255, 0.4);
-        transform: translateX(8px);
-        background: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    }
-    
-    .tx-left { display: flex; align-items: center; gap: 1rem; }
-    .tx-icon { 
-        width: 1.5rem; 
-        height: 1.5rem;
-        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
-    }
-    .tx-pair { 
-        font-size: 0.875rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-    .tx-time { 
-        font-size: 0.75rem;
-        opacity: 0.6;
-        letter-spacing: 1px;
-        margin-top: 0.25rem;
-    }
-    .tx-right { text-align: right; }
-    .tx-amount { 
-        font-size: 0.875rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-    .tx-type { 
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        opacity: 0.6;
-        letter-spacing: 1px;
-        margin-top: 0.25rem;
-    }
-    
-    /* Modal */
-    .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.9);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: 1rem;
-        backdrop-filter: blur(10px);
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    .modal-content {
-        padding: 3rem;
-        max-width: 600px;
-        width: 100%;
-        animation: slideUp 0.4s ease-out;
-        border-radius: 1rem;
-        backdrop-filter: blur(20px);
-    }
-    
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .modal-title {
-        font-size: 1.75rem;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-    }
-    
-    .modal-close {
-        background: none;
-        border: none;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 2rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        font-weight: 300;
-    }
-    
-    .modal-close:hover { 
-        color: #fff;
-        transform: rotate(90deg);
-    }
-    
-    .modal-form-group {
-        margin-bottom: 2rem;
-    }
-    
-    .modal-label {
-        display: block;
-        font-size: 0.75rem;
-        margin-bottom: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: 600;
-    }
-    
-    .modal-input {
-        width: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #fff;
-        padding: 1rem 1.5rem;
-        border-radius: 0.5rem;
-        font-family: 'Orbitron', monospace;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        letter-spacing: 1px;
-    }
-    
-    .modal-input:focus {
-        outline: none;
-        border-color: #fff;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-    
-    .modal-btn {
-        width: 100%;
-        background: #fff;
-        color: #000;
-        font-weight: 800;
-        padding: 1.25rem;
-        border: none;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-family: 'Orbitron', monospace;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-    }
-    
-    .modal-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 40px rgba(255, 255, 255, 0.7);
-    }
-    
-    .alert-box {
-        padding: 3rem;
-        max-width: 600px;
-        width: 100%;
-        animation: slideUp 0.4s ease-out;
-        text-align: center;
-        border-radius: 1rem;
-        backdrop-filter: blur(20px);
-    }
-    
-    .alert-icon {
-        font-size: 4rem;
-        margin-bottom: 1.5rem;
-        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
-        animation: pulse 2s infinite;
-    }
-    
-    .alert-title {
-        font-size: 1.75rem;
-        font-weight: 900;
-        margin-bottom: 1.5rem;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-    }
-    
-    .alert-message {
-        opacity: 0.8;
-        line-height: 1.8;
-        margin-bottom: 2rem;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-    }
-    
-    .alert-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #fff;
-        font-weight: 700;
-        padding: 1rem 3rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-family: 'Orbitron', monospace;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-    }
-    
-    .alert-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-3px);
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-    }
-    
-    canvas { width: 100%; height: 350px; }
-    
-    @media (max-width: 768px) {
-        .stats-grid { grid-template-columns: 1fr; }
-        .header { 
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: center;
-        }
-        .user-info { 
-            text-align: center;
-            flex-direction: column;
-        }
-        .login-title { font-size: 2.5rem; }
-        .header-title { font-size: 2rem; }
-    }
-</style>
-```
 
+        /* Subtle particle background - no dizziness */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 255, 0.08) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.08) 0%, transparent 20%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.05) 0%, transparent 30%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container { 
+            max-width: 1600px; 
+            margin: 0 auto; 
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Modern glassmorphism cards */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        /* Soft neon glow text */
+        .neon-text {
+            text-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.8),
+                0 0 20px rgba(0, 255, 255, 0.4),
+                0 0 30px rgba(255, 0, 255, 0.2);
+        }
+
+        .neon-magenta {
+            text-shadow: 
+                0 0 10px rgba(255, 0, 255, 0.8),
+                0 0 20px rgba(255, 0, 255, 0.4);
+        }
+
+        /* Gentle animations only */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in { animation: fadeIn 1s ease-out forwards; }
+
+        /* Respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; transition-duration: 0s !important; }
+        }
+
+        /* Rest of styles refined for clarity and beauty */
+        .login-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .login-box { width: 100%; max-width: 520px; animation: fadeIn 1.2s ease-out; }
+        .login-title { font-size: 4.5rem; font-weight: 900; text-align: center; margin-bottom: 1rem; letter-spacing: 10px; }
+        .login-subtitle { color: rgba(255,255,255,0.6); text-align: center; margin-bottom: 3rem; letter-spacing: 4px; font-size: 1rem; }
+        .login-form { padding: 3.5rem; border-radius: 1.5rem; }
+        .form-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,255,0.4); padding: 1.2rem 1.8rem; border-radius: 0.8rem; font-size: 1.1rem; letter-spacing: 2px; }
+        .form-input:focus { border-color: #00ffff; box-shadow: 0 0 20px rgba(0,255,255,0.5); }
+        .btn-login { background: linear-gradient(135deg, #00ffff, #ff00ff); color: #000; font-weight: 900; padding: 1.4rem; border-radius: 0.8rem; letter-spacing: 5px; box-shadow: 0 0 30px rgba(0,255,255,0.6); }
+        .btn-login:hover { transform: translateY(-4px); box-shadow: 0 10px 40px rgba(0,255,255,0.8); }
+
+        .header-title { font-size: 3rem; font-weight: 900; letter-spacing: 8px; }
+        .header-subtitle { font-size: 0.9rem; opacity: 0.7; letter-spacing: 4px; }
+        .btn-withdraw { background: linear-gradient(135deg, #ff00ff, #00ffff); color: #000; padding: 1rem 2.5rem; border-radius: 0.8rem; letter-spacing: 4px; box-shadow: 0 0 25px rgba(255,0,255,0.6); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 3rem 0; }
+        .stat-card { padding: 2.5rem; text-align: center; transition: transform 0.4s ease; }
+        .stat-card:hover { transform: translateY(-10px); }
+        .stat-value { font-size: 2.8rem; font-weight: 900; letter-spacing: 3px; }
+        .progress-bar-fill { background: linear-gradient(90deg, #00ffff, #ff00ff); animation: none; box-shadow: 0 0 20px rgba(0,255,255,0.8); }
+
+        canvas { border-radius: 1rem; }
+
+        /* Modal styles refined */
+        .modal-content { padding: 3.5rem; border-radius: 1.5rem; }
+        .modal-btn { background: linear-gradient(135deg, #00ffff, #ff00ff); color: #000; padding: 1.4rem; border-radius: 0.8rem; letter-spacing: 5px; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .login-title { font-size: 3rem; }
+            .header-title { font-size: 2.5rem; }
+        }
+    </style>
 </head>
 <body>
-    <div class="scan-line"></div>
     <div id="app"></div>
 
-```
-<script>
-    let isLoggedIn = false;
-    let isLoading = false;
-    let dashboardData = null;
-    let showWithdrawModal = false;
-    let showAlert = false;
-    let withdrawProcessing = false;
+    <script>
+        let isLoggedIn = false;
+        let isLoading = false;
+        let dashboardData = null;
+        let showWithdrawModal = false;
+        let showAlert = false;
 
-    const INITIAL_BALANCE = 36;
-    const TARGET_BALANCE = 76;
+        const INITIAL_BALANCE = 47.0; // Starting after login
 
-    function generateDashboardData() {
-        const now = Date.now();
-        const startDate = new Date('2025-01-01T00:00:00Z').getTime();
-        const minutesPassed = Math.floor((now - startDate) / (1000 * 60));
-        
-        const baseProfit = minutesPassed * 0.00231;
-        const volatility1 = Math.sin(minutesPassed / 120) * 0.3;
-        const volatility2 = Math.sin(minutesPassed / 47) * 0.15;
-        const volatility3 = Math.sin(minutesPassed / 89) * 0.08;
-        
-        const totalProfit = baseProfit + volatility1 + volatility2 + volatility3;
-        const currentBalance = INITIAL_BALANCE + totalProfit;
-        
-        const chartData = [];
-        for (let i = 24; i >= 0; i--) {
-            const timeOffset = i * 60;
-            const pastMinutes = minutesPassed - timeOffset;
-            const pastProfit = pastMinutes * 0.00231;
-            const pastVol1 = Math.sin(pastMinutes / 120) * 0.3;
-            const pastVol2 = Math.sin(pastMinutes / 47) * 0.15;
-            const pastVol3 = Math.sin(pastMinutes / 89) * 0.08;
-            const pastBalance = INITIAL_BALANCE + pastProfit + pastVol1 + pastVol2 + pastVol3;
-            
-            chartData.push({
-                time: i === 0 ? 'NOW' : i + 'H',
-                balance: Math.max(INITIAL_BALANCE, pastBalance)
-            });
+        // Persistent profit storage
+        function getStoredProfit() {
+            const stored = localStorage.getItem('gramvault_profit');
+            return stored ? parseFloat(stored) : 0;
         }
-        
-        const transactions = [];
-        const tradeInterval = 180;
-        const numTrades = Math.floor(minutesPassed / tradeInterval);
-        
-        for (let i = 0; i < Math.min(numTrades, 15); i++) {
-            const tradeTime = minutesPassed - (i * tradeInterval);
-            const isWin = Math.sin(tradeTime * 0.1) > -0.2;
-            const amount = 0.5 + Math.abs(Math.sin(tradeTime * 0.3)) * 2;
-            const date = new Date(now - (i * tradeInterval * 60 * 1000));
-            
-            transactions.push({
-                id: 'TX' + tradeTime,
-                type: isWin ? 'win' : 'loss',
-                pair: ['SOL/USDC', 'SOL/ETH', 'SOL/BTC'][Math.floor(Math.abs(Math.sin(tradeTime)) * 3)],
-                amount: isWin ? amount : -amount,
-                time: date.toLocaleString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                })
-            });
+
+        function saveProfit(profit) {
+            localStorage.setItem('gramvault_profit', profit.toFixed(4));
         }
-        
-        const daysPassed = minutesPassed / (60 * 24);
-        const progressPercent = Math.min((daysPassed / 12) * 100, 100);
-        
-        const startOfDay = new Date(now);
-        startOfDay.setHours(0, 0, 0, 0);
-        const minutesTodayPassed = Math.floor((now - startOfDay.getTime()) / (1000 * 60));
-        const todayProfit = minutesTodayPassed * 0.00231 + 
-                            Math.sin(minutesPassed / 120) * 0.2 + 
-                            Math.sin(minutesPassed / 47) * 0.1;
-        
-        return {
-            currentBalance,
-            totalProfit,
-            todayProfit,
-            chartData,
-            transactions,
-            progressPercent,
-            daysPassed: daysPassed.toFixed(1),
-            winRate: 68 + Math.sin(minutesPassed / 500) * 5
-        };
-    }
 
-    function renderLoading(text = 'AUTHENTICATING', subtext = 'Verifying credentials...') {
-        return `
-            <div class="loading-screen">
-                <div class="loading-spinner"></div>
-                <div class="loading-text holo-text">${text}</div>
-                <div class="loading-subtext">${subtext}</div>
-                <div class="loading-bar">
-                    <div class="loading-bar-fill"></div>
-                </div>
-            </div>
-        `;
-    }
+        function calculateLiveProfit() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const midnightToday = today.getTime();
+            const midnightYesterday = midnightToday - 86400000;
 
-    function renderLogin() {
-        return `
-            <div class="login-wrapper">
-                <div class="login-box">
-                    <h1 class="login-title holo-text">GRAMVAULT</h1>
-                    <p class="login-subtitle">HOLOGRAPHIC TRADING TERMINAL // VERSION 3.0</p>
-                    
-                    <div class="login-form holo">
-                        <div class="form-group">
-                            <label class="form-label">> USERNAME</label>
-                            <input type="text" id="username" class="form-input" placeholder="ENTER USERNAME" autocomplete="off">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">> PASSWORD</label>
-                            <input type="password" id="password" class="form-input" placeholder="ENTER PASSWORD" autocomplete="off">
-                        </div>
-                        
-                        <div id="error-container"></div>
-                        
-                        <button class="btn-login" onclick="handleLogin()">ACCESS TERMINAL</button>
-                    </div>
-                    
-                    <div class="system-status">
-                        <p>⚡ SYSTEM ONLINE // ENCRYPTED</p>
-                        <p style="margin-top: 0.5rem;">🔒 QUANTUM SECURITY ENABLED</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
+            let totalProfit = getStoredProfit();
 
-    function renderWithdrawModal() {
-        return `
-            <div class="modal-overlay">
-                <div class="modal-content holo">
-                    <div class="modal-header">
-                        <h2 class="modal-title holo-text">WITHDRAW</h2>
-                        <button class="modal-close" onclick="closeWithdrawModal()">×</button>
-                    </div>
-                    
-                    <div class="modal-form-group">
-                        <label class="modal-label">SOLANA WALLET ADDRESS</label>
-                        <input type="text" id="wallet-address" class="modal-input" placeholder="ENTER SOL WALLET ADDRESS" autocomplete="off">
-                    </div>
-                    
-                    <div class="modal-form-group">
-                        <label class="modal-label">AMOUNT (SOL)</label>
-                        <input type="number" id="withdraw-amount" class="modal-input" placeholder="ENTER AMOUNT" step="0.01" min="0.01" autocomplete="off">
-                        <p class="stat-sub" style="margin-top: 1rem;">AVAILABLE: ${dashboardData.currentBalance.toFixed(4)} SOL</p>
-                    </div>
-                    
-                    <button class="modal-btn" onclick="processWithdrawal()">CONFIRM WITHDRAWAL</button>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderAlert() {
-        return `
-            <div class="modal-overlay">
-                <div class="alert-box holo">
-                    <div class="alert-icon">⚠</div>
-                    <h2 class="alert-title holo-text">WITHDRAWAL RESTRICTED</h2>
-                    <p class="alert-message">
-                        SYSTEM ALERT: Account balance verification failed. Current funds are insufficient to process withdrawal request due to active drawdown protection protocols.
-                        <br><br>
-                        REQUIREMENT: Additional profit generation required to maintain account stability and comply with risk management parameters.
-                        <br><br>
-                        ACTION REQUIRED: Allow additional time for profitable trading activity until account balance reaches minimum threshold for secure withdrawal execution.
-                    </p>
-                    <button class="alert-btn" onclick="closeAlert()">ACKNOWLEDGED</button>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderDashboard() {
-        const data = dashboardData;
-        
-        return `
-            <div class="container animate-in">
-                <div class="header">
-                    <div>
-                        <h1 class="header-title holo-text">GRAMVAULT</h1>
-                        <p class="header-subtitle">HOLOGRAPHIC TRADING TERMINAL // v3.0</p>
-                    </div>
-                    <div class="user-info">
-                        <div>
-                            <p style="font-weight: 700; letter-spacing: 2px;">USER: GROOVY9944</p>
-                            <p style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.25rem;">${new Date().toLocaleString()}</p>
-                        </div>
-                        <button class="btn-withdraw" onclick="openWithdrawModal()">WITHDRAW</button>
-                    </div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card holo animate-slide" style="animation-delay: 0.1s;">
-                        <div class="stat-header">
-                            <span class="stat-label">CURRENT BALANCE</span>
-                            <span class="stat-icon">◈</span>
-                        </div>
-                        <p class="stat-value holo-text">${data.currentBalance.toFixed(4)} SOL</p>
-                        <p class="stat-sub">INITIAL: ${INITIAL_BALANCE.toFixed(4)} SOL</p>
-                    </div>
-
-                    <div class="stat-card holo animate-slide" style="animation-delay: 0.2s;">
-                        <div class="stat-header">
-                            <span class="stat-label">TODAY'S P&L</span>
-                            <span class="stat-icon">${data.todayProfit >= 0 ? '▲' : '▼'}</span>
-                        </div>
-                        <p class="stat-value holo-text">
-                            ${data.todayProfit >= 0 ? '+' : ''}${data.todayProfit.toFixed(4)} SOL
-                        </p>
-                        <p class="stat-sub">${((data.todayProfit / INITIAL_BALANCE) * 100).toFixed(2)}% DAILY</p>
-                    </div>
-
-                    <div class="stat-card holo animate-slide" style="animation-delay: 0.3s;">
-                        <div class="stat-header">
-                            <span class="stat-label">TOTAL PROFIT</span>
-                            <span class="stat-icon">◆</span>
-                        </div>
-                        <p class="stat-value holo-text">+${data.totalProfit.toFixed(4)} SOL</p>
-                        <p class="stat-sub">${((data.totalProfit / INITIAL_BALANCE) * 100).toFixed(2)}% ROI</p>
-                    </div>
-
-                    <div class="stat-card holo animate-slide" style="animation-delay: 0.4s;">
-                        <div class="stat-header">
-                            <span class="stat-label">WIN RATE</span>
-                            <span class="stat-icon">◉</span>
-                        </div>
-                        <p class="stat-value holo-text">${data.winRate.toFixed(1)}%</p>
-                        <p class="stat-sub">LIVE PERFORMANCE</p>
-                    </div>
-                </div>
-
-                <div class="progress-card holo animate-slide" style="animation-delay: 0.5s;">
-                    <div class="progress-header">
-                        <span>◈ 12-DAY GOAL PROGRESS</span>
-                        <span style="opacity: 0.7;">DAY ${data.daysPassed} / 12</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${data.progressPercent}%"></div>
-                    </div>
-                    <div class="progress-footer">
-                        <span>START: ${INITIAL_BALANCE} SOL</span>
-                        <span class="holo-text" style="font-weight: 700;">CURRENT: ${data.currentBalance.toFixed(2)} SOL</span>
-                        <span>TARGET: ${TARGET_BALANCE} SOL</span>
-                    </div>
-                </div>
-
-                <div class="chart-card holo animate-slide" style="animation-delay: 0.6s;">
-                    <h2 class="chart-title">> BALANCE TRAJECTORY (24H)</h2>
-                    <canvas id="chart"></canvas>
-                </div>
-
-                <div class="transactions-card holo animate-slide" style="animation-delay: 0.7s;">
-                    <h2 class="chart-title">> TRANSACTION HISTORY</h2>
-                    ${data.transactions.map((tx, i) => `
-                        <div class="tx-item" style="animation: fadeIn 0.5s ease-out ${0.8 + i * 0.05}s backwards;">
-                            <div class="tx-left">
-                                <span class="tx-icon">${tx.type === 'win' ? '▲' : '▼'}</span>
-                                <div>
-                                    <p class="tx-pair">${tx.pair}</p>
-                                    <p class="tx-time">${tx.time}</p>
-                                </div>
-                            </div>
-                            <div class="tx-right">
-                                <p class="tx-amount">
-                                    ${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(4)} SOL
-                                </p>
-                                <p class="tx-type">${tx.type}</p>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    function drawChart() {
-        const canvas = document.getElementById('chart');
-        if (!canvas || !dashboardData) return;
-        
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width = canvas.offsetWidth;
-        const height = canvas.height = 350;
-        
-        ctx.clearRect(0, 0, width, height);
-        
-        const data = dashboardData.chartData;
-        const padding = 50;
-        const chartWidth = width - padding * 2;
-        const chartHeight = height - padding * 2;
-        
-        const values = data.map(d => d.balance);
-        const minVal = Math.min(...values) - 0.5;
-        const maxVal = Math.max(...values) + 0.5;
-        const range = maxVal - minVal;
-        
-        // Draw grid
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= 5; i++) {
-            const y = padding + (chartHeight / 5) * i;
-            ctx.beginPath();
-            ctx.moveTo(padding, y);
-            ctx.lineTo(width - padding, y);
-            ctx.stroke();
-        }
-        
-        for (let i = 0; i <= 6; i++) {
-            const x = padding + (chartWidth / 6) * i;
-            ctx.beginPath();
-            ctx.moveTo(x, padding);
-            ctx.lineTo(x, height - padding);
-            ctx.stroke();
-        }
-        
-        // Draw gradient fill
-        const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        
-        ctx.beginPath();
-        data.forEach((point, i) => {
-            const x = padding + (chartWidth / (data.length - 1)) * i;
-            const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
-            
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        });
-        ctx.lineTo(width - padding, height - padding);
-        ctx.lineTo(padding, height - padding);
-        ctx.closePath();
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        
-        // Draw line with glow
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#fff';
-        ctx.beginPath();
-        
-        data.forEach((point, i) => {
-            const x = padding + (chartWidth / (data.length - 1)) * i;
-            const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
-            
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        });
-        
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        
-        // Draw points
-        data.forEach((point, i) => {
-            if (i % 4 === 0 || i === data.length - 1) {
-                const x = padding + (chartWidth / (data.length - 1)) * i;
-                const y = padding + chartHeight - ((point.balance - minVal) / range) * chartHeight;
-                
-                ctx.beginPath();
-                ctx.arc(x, y, 5, 0, Math.PI * 2);
-                ctx.fillStyle = '#fff';
-                ctx.fill();
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                // Add glow to points
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#fff';
-                ctx.fill();
-                ctx.shadowBlur = 0;
+            // Add 3.4 SOL at midnight if not already added today
+            const lastMidnightAdd = localStorage.getItem('last_midnight_add');
+            if (!lastMidnightAdd || parseInt(lastMidnightAdd) < midnightToday) {
+                totalProfit += 3.4;
+                localStorage.setItem('last_midnight_add', midnightToday);
+                saveProfit(totalProfit);
             }
-        });
-        
-        // Draw labels
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.font = '11px Orbitron';
-        ctx.textAlign = 'left';
-        ctx.fillText(maxVal.toFixed(2), 5, padding + 15);
-        ctx.fillText(minVal.toFixed(2), 5, height - padding + 15);
-        
-        // Draw time labels
-        ctx.textAlign = 'center';
-        for (let i = 0; i < data.length; i += 4) {
-            const x = padding + (chartWidth / (data.length - 1)) * i;
-            ctx.fillText(data[i].time, x, height - padding + 30);
-        }
-    }
 
-    function handleLogin() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const errorContainer = document.getElementById('error-container');
-        
-        if (username === 'Groovy9944' && password === 'user39zxnlojp') {
-            isLoading = true;
-            render();
-            
-            setTimeout(() => {
-                isLoading = false;
-                isLoggedIn = true;
-                dashboardData = generateDashboardData();
-                render();
-                drawChart();
-                
-                setInterval(() => {
-                    dashboardData = generateDashboardData();
-                    render();
-                    drawChart();
-                }, 30000);
-            }, 4000);
-        } else {
-            errorContainer.innerHTML = '<div class="error-box">⛔ ACCESS DENIED // INVALID CREDENTIALS</div>';
-        }
-    }
-
-    function openWithdrawModal() {
-        showWithdrawModal = true;
-        render();
-    }
-
-    function closeWithdrawModal() {
-        showWithdrawModal = false;
-        render();
-    }
-
-    function processWithdrawal() {
-        const walletAddress = document.getElementById('wallet-address').value;
-        const amount = document.getElementById('withdraw-amount').value;
-        
-        if (!walletAddress || !amount) {
-            alert('PLEASE FILL IN ALL FIELDS');
-            return;
-        }
-        
-        withdrawProcessing = true;
-        showWithdrawModal = false;
-        isLoading = true;
-        render();
-        
-        const loadingTexts = [
-            { text: 'PROCESSING WITHDRAWAL', sub: 'Validating wallet address...' },
-            { text: 'VERIFYING TRANSACTION', sub: 'Checking account balance...' },
-            { text: 'ANALYZING DRAWDOWN', sub: 'Calculating risk parameters...' },
-            { text: 'FINALIZING REQUEST', sub: 'Completing verification...' }
-        ];
-        
-        let currentText = 0;
-        const textInterval = setInterval(() => {
-            if (currentText < loadingTexts.length - 1) {
-                currentText++;
-                const loadingTextEl = document.querySelector('.loading-text');
-                const loadingSubEl = document.querySelector('.loading-subtext');
-                if (loadingTextEl && loadingSubEl) {
-                    loadingTextEl.textContent = loadingTexts[currentText].text;
-                    loadingSubEl.textContent = loadingTexts[currentText].sub;
+            // Add hourly 0.2 SOL (on the hour)
+            const hoursToday = now.getHours();
+            const minutes = now.getMinutes();
+            const lastHourAdd = parseInt(localStorage.getItem('last_hour_add') || '0');
+            if (hoursToday > lastHourAdd || (hoursToday === lastHourAdd && minutes === 0)) {
+                if (minutes < 5) { // small grace period
+                    totalProfit += 0.2;
+                    localStorage.setItem('last_hour_add', hoursToday);
+                    saveProfit(totalProfit);
                 }
             }
-        }, 2000);
-        
-        setTimeout(() => {
-            clearInterval(textInterval);
-            isLoading = false;
-            withdrawProcessing = false;
-            showAlert = true;
-            render();
-        }, 7000);
-    }
 
-    function closeAlert() {
-        showAlert = false;
-        render();
-    }
+            // Today's profit (since midnight)
+            const secondsSinceMidnight = (now - midnightToday) / 1000;
+            const hoursPassed = secondsSinceMidnight / 3600;
+            const todayProfit = 3.4 + Math.floor(hoursPassed) * 0.2 + (hoursPassed % 1 > 0 ? 0.2 : 0);
 
-    function render() {
-        let content = '';
-        
-        if (isLoading) {
-            if (withdrawProcessing) {
-                content = renderLoading('PROCESSING WITHDRAWAL', 'Validating wallet address...');
+            return { totalProfit: totalProfit.toFixed(4), todayProfit: todayProfit.toFixed(4) };
+        }
+
+        function generateDashboardData() {
+            const { totalProfit, todayProfit } = calculateLiveProfit();
+            const currentBalance = (INITIAL_BALANCE + parseFloat(totalProfit)).toFixed(4);
+
+            // Simple mock chart data (last 24h)
+            const chartData = [];
+            for (let i = 23; i >= 0; i--) {
+                const pastBalance = parseFloat(currentBalance) - (i * 0.1417); // approx daily/24
+                chartData.push({
+                    time: i === 0 ? 'NOW' : `${i}H`,
+                    balance: Math.max(INITIAL_BALANCE, pastBalance)
+                });
+            }
+
+            // Mock transactions
+            const transactions = [
+                { pair: 'SOL/USDC', amount: 1.24, type: 'win', time: 'Jan 7, 23:45' },
+                { pair: 'SOL/ETH', amount: 0.87, type: 'win', time: 'Jan 7, 22:30' },
+                { pair: 'SOL/BTC', amount: -0.45, type: 'loss', time: 'Jan 7, 20:15' },
+                // ... add more if you want
+            ];
+
+            return {
+                currentBalance,
+                totalProfit,
+                todayProfit,
+                chartData,
+                transactions,
+                winRate: (68 + Math.random() * 10).toFixed(1)
+            };
+        }
+
+        // ... (keep your render functions mostly the same, just update texts)
+
+        function renderLogin() {
+            return `
+                <div class="login-wrapper">
+                    <div class="login-box glass">
+                        <h1 class="login-title neon-text">GRAMVAULT</h1>
+                        <p class="login-subtitle">v3.0</p>
+                        <div class="login-form glass">
+                            <div class="form-group">
+                                <label>> USERNAME</label>
+                                <input type="text" id="username" class="form-input" placeholder="ENTER USERNAME">
+                            </div>
+                            <div class="form-group">
+                                <label>> PASSWORD</label>
+                                <input type="password" id="password" class="form-input" placeholder="ENTER PASSWORD">
+                            </div>
+                            <div id="error-container"></div>
+                            <button class="btn-login" onclick="handleLogin()">ACCESS TERMINAL</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDashboard() {
+            const data = dashboardData;
+            return `
+                <div class="container animate-in">
+                    <div class="header glass" style="padding: 2rem; margin-bottom: 3rem;">
+                        <div>
+                            <h1 class="header-title neon-text">GRAMVAULT</h1>
+                            <p class="header-subtitle">v3.0</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-weight: 700;">USER: GROOVY9944</p>
+                            <button class="btn-withdraw" onclick="openWithdrawModal()">WITHDRAW</button>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card glass animate-in">
+                            <p class="stat-label">CURRENT BALANCE</p>
+                            <p class="stat-value neon-text">${data.currentBalance} SOL</p>
+                        </div>
+                        <div class="stat-card glass animate-in">
+                            <p class="stat-label">TODAY'S P&L</p>
+                            <p class="stat-value neon-text">+${data.todayProfit} SOL</p>
+                        </div>
+                        <div class="stat-card glass animate-in">
+                            <p class="stat-label">TOTAL PROFIT</p>
+                            <p class="stat-value neon-magenta">+${data.totalProfit} SOL</p>
+                        </div>
+                        <div class="stat-card glass animate-in">
+                            <p class="stat-label">WIN RATE</p>
+                            <p class="stat-value neon-text">${data.winRate}%</p>
+                        </div>
+                    </div>
+
+                    <!-- Keep chart and transactions similar, just glass class -->
+                    <div class="chart-card glass" style="padding: 2.5rem; margin: 3rem 0;">
+                        <h2 style="margin-bottom: 2rem; letter-spacing: 4px;">BALANCE TRAJECTORY (24H)</h2>
+                        <canvas id="chart"></canvas>
+                    </div>
+
+                    <!-- Transactions card similar -->
+                </div>
+            `;
+        }
+
+        // Keep your handleLogin, modal, alert, chart drawing, and render logic the same
+        // Just make sure to call dashboardData = generateDashboardData(); after login and in interval
+
+        function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            if (username === 'Groovy9944' && password === 'user39zxnlojp') {
+                isLoading = true; render();
+                setTimeout(() => {
+                    isLoading = false; isLoggedIn = true;
+                    dashboardData = generateDashboardData();
+                    render(); drawChart();
+
+                    // Live update every minute
+                    setInterval(() => {
+                        dashboardData = generateDashboardData();
+                        render(); drawChart();
+                    }, 60000);
+                }, 3000);
             } else {
-                content = renderLoading('AUTHENTICATING', 'Verifying credentials...');
-            }
-        } else if (showAlert) {
-            content = renderAlert();
-        } else if (showWithdrawModal) {
-            content = renderDashboard() + renderWithdrawModal();
-        } else if (isLoggedIn) {
-            content = renderDashboard();
-        } else {
-            content = renderLogin();
-        }
-        
-        document.getElementById('app').innerHTML = content;
-    }
-
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !isLoggedIn && !isLoading) {
-            const username = document.getElementById('username');
-            const password = document.getElementById('password');
-            if (username && password) {
-                handleLogin();
+                document.getElementById('error-container').innerHTML = '<div style="padding:1rem; background:rgba(255,0,0,0.2); border-radius:0.8rem; margin-top:1rem;">ACCESS DENIED</div>';
             }
         }
-    });
 
-    render();
-</script>
-```
+        // ... (keep drawChart, modals, etc. from your original code)
 
+        function render() {
+            // same as your original
+            let content = isLoading ? '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;"><div class="neon-text" style="font-size:3rem;">AUTHENTICATING...</div></div>' :
+                          showAlert ? renderAlert() :
+                          showWithdrawModal ? renderDashboard() + renderWithdrawModal() :
+                          isLoggedIn ? renderDashboard() : renderLogin();
+            document.getElementById('app').innerHTML = content;
+        }
+
+        render();
+    </script>
 </body>
 </html>
