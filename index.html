@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#09090b">
+    <meta name="theme-color" content="#050505">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>GRAMVAULT | INSTITUTIONAL EXECUTION</title>
@@ -54,6 +54,7 @@
         .text-muted { color: var(--col-text-muted); }
         .uppercase { text-transform: uppercase; }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
+        .full-width { width: 100%; }
         
         /* --- SVGs (Icon System) --- */
         .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -93,6 +94,7 @@
         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
 
         /* --- BACKGROUND FX --- */
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; pointer-events: none; }
@@ -107,6 +109,8 @@
             grid-template-rows: 60px 1fr; 
             height: 100vh;
             width: 100vw;
+            opacity: 0; /* Hidden by default until login */
+            transition: opacity 0.8s ease-in-out;
         }
 
         /* Header */
@@ -161,7 +165,11 @@
             display: flex; justify-content: space-between; align-items: flex-end; padding: 30px;
             background: linear-gradient(180deg, rgba(20,241,149,0.03) 0%, rgba(0,0,0,0) 100%);
         }
-        .bal-val { font-family: var(--font-data); font-size: 3.5rem; font-weight: 700; line-height: 1; letter-spacing: -1px; margin: 10px 0; }
+        .bal-val { 
+            font-family: var(--font-data); 
+            font-size: clamp(2.5rem, 5vw, 4rem); /* Responsive Font Size */
+            font-weight: 700; line-height: 1; letter-spacing: -1px; margin: 10px 0; 
+        }
         .bal-pnl { display: flex; align-items: center; gap: 6px; color: var(--col-solana); font-family: var(--font-data); font-size: 0.9rem; }
         
         /* Chart */
@@ -178,23 +186,26 @@
 
         /* --- MODALS --- */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000;
-            display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
+            display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px);
         }
         .modal {
-            background: #0a0a0a; border: 1px solid var(--border-light); width: 100%; max-width: 480px;
+            background: #09090b; border: 1px solid var(--border-light); width: 90%; max-width: 440px;
             border-radius: 12px; overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
             animation: slideIn 0.3s var(--ease-quart);
         }
         .modal-body { padding: 30px; }
         .modal-footer { padding: 20px 30px; background: #111; border-top: 1px solid var(--border-light); display: flex; gap: 10px; }
 
+        /* Login Specific */
+        .shake-anim { animation: shake 0.4s ease-in-out; }
+
         /* Loader specific */
         .loader-ring {
             width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--col-solana);
             border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto;
         }
-        .step-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: var(--font-data); font-size: 0.8rem; color: #666; }
+        .step-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: var(--font-data); font-size: 0.85rem; color: #666; }
         .step-row.active { color: #fff; }
         .step-row.done span:last-child { color: var(--col-solana); }
 
@@ -208,7 +219,9 @@
             .sidebar { display: none; }
             .nav-items { display: none; }
             .hero-section { flex-direction: column; align-items: flex-start; gap: 20px; }
-            .bal-val { font-size: 2.5rem; }
+            .header { padding: 0 15px; }
+            .logo-area span { display: none; } /* Hide "PRO" badge on tiny screens if needed */
+            .main-view { padding: 15px; gap: 15px; }
         }
     </style>
 </head>
@@ -218,7 +231,7 @@
     <div class="scanlines"></div>
 
     <div id="view-login" class="modal-overlay">
-        <div class="modal" style="border-top: 3px solid var(--col-solana);">
+        <div class="modal" id="login-modal-box" style="border-top: 3px solid var(--col-solana);">
             <div class="modal-body" style="text-align: center;">
                 <div style="margin-bottom: 20px;">
                     <svg width="48" height="48" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#grad1)"/><defs><linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
@@ -237,7 +250,7 @@
                 
                 <div id="login-err" style="height: 20px; color: var(--col-danger); font-size: 0.8rem; font-family: var(--font-data); margin-bottom: 10px;"></div>
                 
-                <button class="btn btn-primary" style="width: 100%; justify-content: center; height: 48px;" onclick="App.login()">
+                <button class="btn btn-primary" style="width: 100%; justify-content: center; height: 48px;" onclick="Engine.login()">
                     ESTABLISH SECURE UPLINK
                 </button>
             </div>
@@ -251,7 +264,7 @@
         <div class="modal" style="max-width: 600px;">
             <div class="panel-header">
                 <span>STRATEGY WHITEPAPER</span>
-                <span style="cursor: pointer;" onclick="App.toggle('view-docs', false)">✕</span>
+                <span style="cursor: pointer;" onclick="Engine.toggle('view-docs', false)">✕</span>
             </div>
             <div class="modal-body" style="overflow-y: auto; max-height: 400px;">
                 <div style="margin-bottom: 24px;">
@@ -268,7 +281,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn" style="width: 100%;" onclick="App.toggle('view-docs', false)">CLOSE</button>
+                <button class="btn full-width" onclick="Engine.toggle('view-docs', false)">CLOSE</button>
             </div>
         </div>
     </div>
@@ -277,7 +290,7 @@
         <div class="modal">
             <div class="panel-header">
                 <span>WITHDRAWAL REQUEST</span>
-                <span style="cursor: pointer;" onclick="App.toggle('view-withdraw', false)">✕</span>
+                <span style="cursor: pointer;" onclick="Engine.toggle('view-withdraw', false)">✕</span>
             </div>
             <div class="modal-body">
                 <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between;">
@@ -294,8 +307,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn" onclick="App.toggle('view-withdraw', false)">CANCEL</button>
-                <button class="btn btn-primary" style="flex: 1;" onclick="App.submitWithdraw()">CONFIRM TRANSFER</button>
+                <button class="btn" onclick="Engine.toggle('view-withdraw', false)">CANCEL</button>
+                <button class="btn btn-primary" style="flex: 1;" onclick="Engine.submitWithdraw()">CONFIRM TRANSFER</button>
             </div>
         </div>
     </div>
@@ -337,29 +350,29 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button class="btn" style="width: 100%; justify-content: center;" onclick="App.toggle('view-error', false)">ACKNOWLEDGE</button>
+                <button class="btn full-width" onclick="Engine.toggle('view-error', false)">ACKNOWLEDGE</button>
             </div>
         </div>
     </div>
 
-    <div class="app-container">
+    <div id="main-app" class="app-container">
         
         <header class="header">
             <div class="logo-area">
-                <svg width="24" height="24" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#g2)"/><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
+                <svg width="24" height="24" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1z" fill="url(#g2)"/><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
                 GRAMVAULT <span style="font-size: 0.6em; background: #222; padding: 2px 4px; border-radius: 3px; border: 1px solid #333; margin-left: 5px; color: #888;">PRO</span>
             </div>
             
             <div class="nav-items">
                 <div class="nav-link active">Terminal</div>
                 <div class="nav-link">Analytics</div>
-                <div class="nav-link" onclick="App.toggle('view-docs', true)">Strategies</div>
+                <div class="nav-link" onclick="Engine.toggle('view-docs', true)">Strategies</div>
             </div>
 
             <div class="flex items-center gap-4">
                 <div class="badge badge-live hidden-mobile"><div class="pulse-dot"></div> MAINNET</div>
                 <div class="text-mono text-xs text-muted hidden-mobile" id="clock">00:00:00</div>
-                <button class="btn btn-primary" onclick="App.openWithdraw()">
+                <button class="btn btn-primary" onclick="Engine.openWithdraw()">
                     <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16v7zm-3 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7h18z"/></svg>
                     WITHDRAW
                 </button>
@@ -430,100 +443,115 @@
 
     <script>
         /**
-         * GRAMVAULT ENGINE v6.0
-         * Handles Authentication, Math, Canvas Rendering, and UI State.
+         * GRAMVAULT ENGINE v7.0
+         * Handles Logic, Math, Charts, and DOM interactions.
          */
-        const App = {
+        
+        const Engine = {
             // Configuration
             // START_EPOCH: Jan 1, 2026. Ensures consistent math for all users.
             START_EPOCH: 1767225600000, 
             BASE_BALANCE: 30.00,
-            DAILY_YIELD: 2.40, // Exact 2.4 SOL per day
+            DAILY_YIELD: 2.40,
             
             // State
-            chartHistory: [],
-            particles: [],
-
+            chartData: [],
+            
             init() {
-                this.initBackground();
+                this.initCanvas();
                 this.genHistory();
-                this.startClock();
                 this.renderWatchlist();
-                this.startIntel();
+                this.startFeed();
                 
-                // Add Enter key listener for login
-                document.getElementById('login-key').addEventListener('keydown', (e) => {
-                    if(e.key === 'Enter') this.attemptLogin();
+                // Keyboard Listeners for Login
+                const keyInput = document.getElementById('inp-key');
+                keyInput.addEventListener("keypress", function(event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        Engine.login();
+                    }
                 });
+
+                // Clock Loop
+                setInterval(() => {
+                    const now = new Date();
+                    document.getElementById('clock').innerText = now.toISOString().split('T')[1].split('.')[0] + " UTC";
+                }, 1000);
             },
 
-            // --- AUTHENTICATION ---
-            attemptLogin() {
-                const u = document.getElementById('inp-id').value;
-                const p = document.getElementById('inp-key').value;
-                const btn = document.querySelector('#view-login .btn-primary');
-                const err = document.getElementById('login-err');
-
-                if(u === "Groovy9944" && p === "user39zxnlojp") {
-                    btn.innerText = "AUTHENTICATED";
-                    btn.style.background = "#fff";
-                    btn.style.color = "#000";
-                    setTimeout(() => {
-                        document.getElementById('view-login').style.opacity = '0';
-                        setTimeout(() => {
-                            document.getElementById('view-login').style.display = 'none';
-                            this.startLive();
-                        }, 500);
-                    }, 800);
-                } else {
-                    err.innerText = "ACCESS DENIED: INVALID CREDENTIALS";
-                    const modal = document.querySelector('#view-login .modal');
-                    modal.style.transform = "translateX(5px)";
-                    setTimeout(() => modal.style.transform = "translateX(0)", 100);
-                }
-            },
-
-            // --- CORE ENGINE (MATH) ---
+            // --- MATH & DATA ---
             calculate() {
                 const now = Date.now();
                 // Ensure positive number even if system clock is weird
                 const diff = Math.max(0, now - this.START_EPOCH);
+                
                 const daysElapsed = diff / (1000 * 60 * 60 * 24);
                 
-                // Growth
+                // Deterministic Growth (2.4 per day)
                 const organicGrowth = daysElapsed * this.DAILY_YIELD;
                 
-                // Noise (Sine waves)
+                // Add noise (Sine waves) to make it look "alive" but stay on trend
                 const noise = (Math.sin(diff / 5000) * 0.02) + (Math.cos(diff / 1300) * 0.01);
                 
                 const total = this.BASE_BALANCE + organicGrowth + noise;
                 
-                // Today's PnL
+                // PnL for "Today"
                 const secondsToday = (now % 86400000) / 1000;
                 const pnlToday = (secondsToday / 86400) * this.DAILY_YIELD;
 
                 return {
                     sol: total,
-                    usd: total * 148.52, // Mock Price
+                    usd: total * 148.52, // Mock price
                     pnl: pnlToday
                 };
             },
 
-            startEngine() {
+            // --- AUTH ---
+            login() {
+                const u = document.getElementById('inp-id').value;
+                const p = document.getElementById('inp-key').value;
+                const btn = document.querySelector('#view-login .btn-primary');
+                const err = document.getElementById('login-err');
+                const modalBox = document.getElementById('login-modal-box');
+
+                if(u === "Groovy9944" && p === "user39zxnlojp") {
+                    btn.innerText = "AUTHENTICATED";
+                    btn.style.background = "#fff";
+                    btn.style.color = "#000";
+                    
+                    // Fade out login modal
+                    document.getElementById('view-login').style.transition = "opacity 0.5s ease";
+                    document.getElementById('view-login').style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        document.getElementById('view-login').style.display = 'none';
+                        // Fade in main app
+                        const app = document.getElementById('main-app');
+                        app.style.opacity = '1';
+                        this.startLive();
+                    }, 500);
+                } else {
+                    err.innerText = "ACCESS DENIED: INVALID CREDENTIALS";
+                    modalBox.classList.add('shake-anim');
+                    setTimeout(() => modalBox.classList.remove('shake-anim'), 400);
+                }
+            },
+
+            // --- MAIN LOOP ---
+            startLive() {
                 setInterval(() => {
                     const data = this.calculate();
                     
                     // DOM Updates
                     document.getElementById('main-bal').innerText = data.sol.toFixed(4);
                     document.getElementById('main-pnl').innerText = "+" + data.pnl.toFixed(4);
-                    document.getElementById('main-usd').innerText = data.usd.toLocaleString('en-US', {minimumFractionDigits: 2});
                     document.getElementById('side-usd').innerText = data.usd.toLocaleString('en-US', {minimumFractionDigits: 2});
-
-                    // Update Chart
+                    
+                    // Chart
                     this.updateChart(data.sol);
 
-                    // Random Log
-                    if (Math.random() > 0.8) this.addLog();
+                    // Random Activity
+                    if(Math.random() > 0.8) this.addLog();
 
                 }, 1000);
             },
@@ -569,7 +597,7 @@
                         el.classList.remove('done', 'active');
                         el.querySelector('span:last-child').innerText = "WAITING";
                     });
-                }, 7000);
+                }, 7500);
             },
 
             toggle(id, state) {
