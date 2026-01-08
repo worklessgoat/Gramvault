@@ -3,584 +3,932 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRAMVAULT | Institutional Solana Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>GRAMVAULT | SOLANA INSTITUTIONAL TERMINAL [PRO]</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* * ==========================================================================
+         * CORE DESIGN SYSTEM - GRAMVAULT PRO
+         * Version: 4.2.0 (Stable)
+         * ==========================================================================
+         */
+
         :root {
-            --sol-purple: #9945FF;
-            --sol-green: #14F195;
-            --sol-dark: #080808;
-            --sol-panel: rgba(20, 20, 20, 0.6);
-            --sol-border: rgba(255, 255, 255, 0.08);
-            --text-main: #FFFFFF;
-            --text-muted: #888;
-            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+            /* Color Palette - Solana Ecosystem */
+            --sol-primary: #9945FF;
+            --sol-secondary: #14F195;
+            --sol-accent: #19FB9B;
+            --sol-dark: #000000;
+            --sol-surface: #0C0C0C;
+            --sol-panel: #121212;
+            --sol-border: rgba(255, 255, 255, 0.06);
+            --sol-border-hover: rgba(255, 255, 255, 0.15);
+            
+            /* Status Indicators */
+            --status-online: #14F195;
+            --status-busy: #FFD512;
+            --status-error: #FF4B4B;
+            --status-offline: #666666;
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Rajdhani', sans-serif;
+
+            /* Spacing & Layout */
+            --header-height: 70px;
+            --sidebar-width: 280px;
+            --border-radius: 4px;
+            
+            /* Animation Curves */
+            --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-
+        /* RESET & BASE */
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        
         body {
             background-color: var(--sol-dark);
-            font-family: 'Manrope', sans-serif;
-            color: var(--text-main);
-            overflow-x: hidden;
-            min-height: 100vh;
+            color: #ffffff;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(153, 69, 255, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(20, 241, 149, 0.05), transparent 25%);
         }
 
-        /* --- BACKGROUND FX --- */
-        .bg-grid {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
-            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        /* UTILITIES */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .text-mono { font-family: var(--font-mono); }
+        .text-display { font-family: var(--font-display); }
+        .text-gradient {
+            background: linear-gradient(135deg, #FFF, #AAA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        #particle-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        .text-solana {
+            background: linear-gradient(90deg, var(--sol-secondary), var(--sol-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        /* CANVAS BACKGROUND */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* UI GRID OVERLAY */
+        .scanline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%;
+            z-index: 1;
+            pointer-events: none;
             opacity: 0.4;
         }
 
-        /* --- SHARED UI --- */
-        .btn-grad {
-            background: linear-gradient(135deg, var(--sol-purple), var(--sol-green));
-            border: none; padding: 1px; border-radius: 8px; cursor: pointer;
-            transition: transform 0.2s var(--ease);
-            position: relative; overflow: hidden;
+        /* * ==========================================================================
+         * COMPONENT: BUTTONS & INPUTS
+         * ==========================================================================
+         */
+        
+        .btn-institutional {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--sol-border);
+            color: #fff;
+            padding: 12px 24px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-quart);
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .btn-grad-inner {
-            background: #000; border-radius: 7px; padding: 12px 24px;
-            color: white; font-weight: 700; font-family: 'Manrope', sans-serif;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+
+        .btn-institutional::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 2px; height: 100%;
+            background: var(--sol-secondary);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .btn-institutional:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--sol-secondary);
+            padding-left: 28px;
+        }
+
+        .btn-institutional:hover::before {
+            transform: scaleY(1);
+        }
+
+        .btn-primary-action {
+            background: var(--sol-secondary);
+            color: #000;
+            font-weight: 700;
+            border: none;
+        }
+        .btn-primary-action:hover {
+            background: #00ffaa;
+            box-shadow: 0 0 30px rgba(20, 241, 149, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--sol-border);
+            border-left: 2px solid var(--sol-border);
+            padding: 16px;
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--sol-secondary);
+            border-left-width: 4px;
+            box-shadow: 0 0 20px rgba(20, 241, 149, 0.1);
+        }
+
+        /* * ==========================================================================
+         * VIEW: LANDING PAGE
+         * ==========================================================================
+         */
+
+        #view-landing {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .navbar {
+            height: var(--header-height);
+            border-bottom: 1px solid var(--sol-border);
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(0,0,0,0.7);
+        }
+
+        .brand-logo {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-section {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero-badge {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--sol-secondary);
+            border: 1px solid rgba(20, 241, 149, 0.3);
+            background: rgba(20, 241, 149, 0.05);
+            padding: 6px 12px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #666666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            max-width: 600px;
+            margin-bottom: 48px;
+            line-height: 1.6;
+        }
+
+        /* Specs Grid */
+        .specs-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--sol-border);
+            border-top: 1px solid var(--sol-border);
+            max-width: 1200px;
+            margin: 0 auto 100px auto;
+        }
+
+        .spec-item {
+            background: var(--sol-dark);
+            padding: 40px;
             transition: background 0.3s;
         }
-        .btn-grad:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(153, 69, 255, 0.4); }
-        .btn-grad:hover .btn-grad-inner { background: transparent; color: #000; }
 
-        .logo {
-            display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.5px; font-size: 1.25rem;
+        .spec-item:hover { background: #080808; }
+
+        .spec-label { font-family: var(--font-mono); color: #666; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 10px; }
+        .spec-value { font-size: 1.5rem; font-weight: 600; color: #fff; margin-bottom: 10px; }
+        .spec-detail { font-size: 0.9rem; color: #888; }
+
+        /* * ==========================================================================
+         * VIEW: LOADER
+         * ==========================================================================
+         */
+
+        #view-loader {
+            position: fixed; inset: 0; z-index: 200; background: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* --- LANDING PAGE --- */
-        #landing-page { position: relative; z-index: 10; padding-bottom: 100px; }
-        
-        .nav {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 24px 40px; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50;
-            border-bottom: 1px solid var(--sol-border);
+        .terminal-loader {
+            width: 300px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
         }
 
-        .hero {
-            text-align: center; padding: 120px 20px;
-            background: radial-gradient(circle at 50% 30%, rgba(153,69,255,0.15), transparent 60%);
+        .loader-bar {
+            width: 100%; height: 2px; background: #222; margin: 15px 0;
+            position: relative; overflow: hidden;
         }
 
-        .hero h1 {
-            font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 24px;
-            background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        .loader-progress {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+            background: var(--sol-secondary);
+            box-shadow: 0 0 10px var(--sol-secondary);
+            transition: width 0.1s linear;
         }
 
-        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 40px auto; }
+        .log-line { color: #444; margin-bottom: 4px; }
+        .log-line.active { color: var(--sol-secondary); }
 
-        .specs-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;
-            max-width: 1200px; margin: 0 auto; padding: 0 20px;
+        /* * ==========================================================================
+         * VIEW: DASHBOARD
+         * ==========================================================================
+         */
+
+        #view-dashboard {
+            position: relative; z-index: 20; height: 100vh;
+            display: grid; grid-template-columns: var(--sidebar-width) 1fr;
+            background: rgba(0,0,0,0.3);
         }
 
-        .spec-card {
-            background: var(--sol-panel); border: 1px solid var(--sol-border);
-            padding: 32px; border-radius: 16px; transition: 0.3s;
-        }
-        .spec-card:hover { border-color: var(--sol-green); transform: translateY(-5px); }
-        .spec-icon { font-size: 2rem; margin-bottom: 16px; }
-        .spec-title { font-weight: 700; margin-bottom: 8px; color: white; }
-        .spec-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
-
-        /* --- LOADING SCREEN --- */
-        #loader {
-            position: fixed; inset: 0; background: #000; z-index: 1000;
-            display: none; align-items: center; justify-content: center; flex-direction: column;
-        }
-        .loader-bar-bg { width: 300px; height: 2px; background: #222; margin-top: 20px; border-radius: 2px; }
-        .loader-bar-fill { width: 0%; height: 100%; background: var(--sol-green); box-shadow: 0 0 10px var(--sol-green); transition: width 0.1s linear; }
-        .loader-text { font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--sol-green); margin-top: 10px; }
-
-        /* --- DASHBOARD (Hidden initially) --- */
-        #app-container { display: none; height: 100vh; overflow: hidden; position: relative; }
-        
-        .dashboard-layout {
-            display: grid; grid-template-columns: 260px 1fr; height: 100vh;
-        }
-
+        /* Sidebar */
         .sidebar {
-            background: rgba(10,10,10,0.9); border-right: 1px solid var(--sol-border);
-            padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
-        }
-        
-        .menu-item {
-            padding: 12px; color: var(--text-muted); cursor: pointer; border-radius: 8px; margin-bottom: 4px; font-weight: 600; display: flex; align-items: center; gap: 10px;
-        }
-        .menu-item.active { background: rgba(255,255,255,0.05); color: white; }
-        .menu-item:hover { color: white; }
-
-        .main-content { padding: 32px; overflow-y: auto; }
-        
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px; }
-        
-        .stat-card {
-            background: var(--sol-panel); border: 1px solid var(--sol-border);
-            padding: 24px; border-radius: 12px; position: relative; overflow: hidden;
-        }
-        
-        .balance-hero {
-            grid-column: span 2; background: linear-gradient(160deg, rgba(20,20,20,0.8), rgba(20, 241, 149, 0.05));
+            background: #050505;
+            border-right: 1px solid var(--sol-border);
+            padding: 24px;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
 
-        .live-indicator {
-            width: 8px; height: 8px; background: var(--sol-green); border-radius: 50%;
-            box-shadow: 0 0 10px var(--sol-green); animation: pulse 2s infinite; display: inline-block; margin-right: 6px;
+        .nav-group { margin-bottom: 40px; }
+        .nav-label { font-family: var(--font-mono); font-size: 0.65rem; color: #444; text-transform: uppercase; margin-bottom: 16px; padding-left: 12px; }
+        
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; border-radius: 4px;
+            color: #888; cursor: pointer; transition: 0.2s;
+            font-weight: 500; font-size: 0.9rem;
+        }
+        
+        .nav-item.active { background: rgba(255, 255, 255, 0.05); color: #fff; border-left: 2px solid var(--sol-secondary); }
+        .nav-item:hover { color: #fff; background: rgba(255, 255, 255, 0.02); }
+
+        /* Main Content */
+        .main-pane {
+            overflow-y: auto; padding: 40px;
         }
 
-        .big-number { font-family: 'JetBrains Mono'; font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; margin: 10px 0; }
-        .pnl { font-family: 'JetBrains Mono'; font-size: 1rem; font-weight: 600; }
-        .green { color: var(--sol-green); }
-        .red { color: #ff4b4b; }
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+        }
+
+        .balance-section {
+            background: linear-gradient(180deg, rgba(20, 20, 20, 0.8) 0%, rgba(20, 241, 149, 0.02) 100%);
+            border: 1px solid var(--sol-border);
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+        }
+
+        .balance-label { font-family: var(--font-mono); color: #666; font-size: 0.8rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .balance-amount { font-family: var(--font-display); font-size: 4rem; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+        .balance-usd { font-family: var(--font-mono); color: #666; font-size: 1rem; margin-top: 8px; }
+        
+        .pnl-badge {
+            background: rgba(20, 241, 149, 0.1);
+            color: var(--sol-secondary);
+            border: 1px solid rgba(20, 241, 149, 0.2);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
 
         /* Chart */
-        .chart-container {
-            background: var(--sol-panel); border: 1px solid var(--sol-border); border-radius: 12px; padding: 24px; height: 400px; margin-bottom: 24px;
-        }
-        canvas { width: 100%; height: 100%; }
-
-        /* --- AUTH MODAL --- */
-        #auth-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
-            z-index: 100; display: flex; align-items: center; justify-content: center;
-        }
-        .auth-box {
-            background: #0a0a0a; border: 1px solid var(--sol-border); padding: 40px; border-radius: 16px;
-            width: 400px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.5); border-top: 1px solid var(--sol-purple);
-        }
-        .input-field {
-            width: 100%; background: #111; border: 1px solid #333; color: white; padding: 14px;
-            border-radius: 8px; margin-bottom: 16px; font-family: 'Manrope'; outline: none; transition: 0.3s;
-        }
-        .input-field:focus { border-color: var(--sol-green); background: #161616; }
-
-        /* --- MODALS --- */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
-        }
-        .modal.active { display: flex; }
-        .modal-card {
-            background: #111; border: 1px solid #333; width: 450px; padding: 30px; border-radius: 16px;
+        .chart-wrapper {
+            background: #080808; border: 1px solid var(--sol-border);
+            border-radius: 8px; padding: 24px; height: 350px; margin-bottom: 24px;
+            position: relative;
         }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        @media(max-width: 900px) { .dashboard-layout { grid-template-columns: 1fr; } .sidebar { display: none; } .stats-row { grid-template-columns: 1fr; } .balance-hero { grid-column: span 1; } .hero h1 { font-size: 2.5rem; } }
+        /* Transaction Log */
+        .log-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.8rem; }
+        .log-table th { text-align: left; color: #444; padding: 12px; border-bottom: 1px solid var(--sol-border); font-weight: 400; }
+        .log-table td { padding: 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #aaa; }
+        .log-table tr:hover td { background: rgba(255,255,255,0.02); color: #fff; }
+        .tx-buy { color: var(--sol-secondary) !important; }
+        .tx-sell { color: var(--status-error) !important; }
+
+        /* * ==========================================================================
+         * MODALS
+         * ==========================================================================
+         */
+
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .modal-window {
+            background: #0C0C0C;
+            border: 1px solid var(--sol-border);
+            width: 100%; max-width: 460px;
+            padding: 40px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            transform: translateY(0);
+            animation: modalSlide 0.4s var(--ease-out-quart);
+        }
+
+        @keyframes modalSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .specs-container { grid-template-columns: 1fr; }
+            .hero-title { font-size: 3.5rem; }
+            #view-dashboard { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="bg-grid"></div>
-    <canvas id="particle-canvas"></canvas>
+    <canvas id="webgl-canvas"></canvas>
+    <div class="scanline-overlay"></div>
 
-    <div id="landing-page">
-        <nav class="nav">
-            <div class="logo">
-                <svg width="24" height="24" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#grad1)"/><defs><linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
-                GRAMVAULT
+    <div id="modal-auth" class="modal-backdrop hidden">
+        <div class="modal-window" style="border-top: 2px solid var(--sol-primary);">
+            <h3 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 8px;">TERMINAL ACCESS</h3>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 32px;">SECURE CONNECTION // NODE: SOL-MAIN-88</p>
+            
+            <div class="input-group">
+                <input type="text" id="auth-user" class="input-field" placeholder="IDENTITY KEY">
             </div>
-            <button class="btn-grad" onclick="System.startLoad()">
-                <div class="btn-grad-inner">LAUNCH TERMINAL</div>
+            <div class="input-group">
+                <input type="password" id="auth-pass" class="input-field" placeholder="ACCESS TOKEN">
+            </div>
+            
+            <div id="auth-error" style="color: var(--status-error); font-size: 0.8rem; height: 20px; margin-bottom: 20px;"></div>
+            
+            <button class="btn-institutional btn-primary-action" style="width: 100%;" onclick="System.verifyCreds()">
+                ESTABLISH UPLINK
             </button>
+        </div>
+    </div>
+
+    <div id="modal-withdraw" class="modal-backdrop hidden">
+        <div class="modal-window">
+            <h3 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 24px;">WITHDRAW ASSETS</h3>
+            
+            <div class="input-group">
+                <label style="display: block; color: #666; font-size: 0.7rem; margin-bottom: 8px;">DESTINATION (SPL WALLET)</label>
+                <input type="text" class="input-field" placeholder="Solana Address...">
+            </div>
+            
+            <div class="input-group">
+                <label style="display: block; color: #666; font-size: 0.7rem; margin-bottom: 8px;">AMOUNT (SOL)</label>
+                <input type="number" class="input-field" placeholder="0.00">
+                <div style="text-align: right; margin-top: 6px; font-size: 0.75rem; color: #888;">
+                    Available: <span id="withdraw-max" class="text-mono text-solana">0.00</span> SOL
+                </div>
+            </div>
+
+            <div class="flex" style="gap: 16px; margin-top: 32px;">
+                <button class="btn-institutional" style="flex: 1;" onclick="System.toggleModal('modal-withdraw', false)">CANCEL</button>
+                <button class="btn-institutional btn-primary-action" style="flex: 1;" onclick="System.submitWithdraw()">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-error" class="modal-backdrop hidden">
+        <div class="modal-window" style="border-color: var(--status-error);">
+            <div style="color: var(--status-error); font-size: 2rem; margin-bottom: 16px;">⚠</div>
+            <h3 style="margin-bottom: 12px; color: #fff;">TRANSACTION HALTED</h3>
+            <div style="background: rgba(255, 75, 75, 0.1); padding: 16px; border-radius: 4px; margin-bottom: 24px;">
+                <div class="text-mono" style="color: var(--status-error); font-size: 0.8rem; font-weight: 700;">ERR_CODE: 0x4B3_LIQUIDITY</div>
+                <p style="color: #faa; font-size: 0.85rem; margin-top: 8px;">Automated Risk Engine blocked this request.</p>
+            </div>
+            <p style="color: #888; font-size: 0.9rem; line-height: 1.6; margin-bottom: 32px;">
+                Your account requires a minimum collateral buffer to execute external transfers. 
+                <br><br>
+                <strong>REQUIRED ACTION:</strong> Increase balance by <span style="color: #fff; font-weight: 700;">12.50 SOL</span>.
+            </p>
+            <button class="btn-institutional" style="width: 100%; border-color: #333;" onclick="System.toggleModal('modal-error', false)">ACKNOWLEDGE</button>
+        </div>
+    </div>
+
+    <div id="view-landing">
+        <nav class="navbar">
+            <div class="brand-logo">
+                <svg width="24" height="24" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#g1)"/><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
+                GRAMVAULT <span style="font-size: 0.6rem; margin-top: 4px; opacity: 0.5;">PRO</span>
+            </div>
+            <button class="btn-institutional" onclick="System.initLoadSequence()">LAUNCH TERMINAL</button>
         </nav>
 
-        <section class="hero">
-            <div style="display: inline-block; padding: 6px 12px; border: 1px solid var(--sol-border); border-radius: 20px; font-size: 0.8rem; margin-bottom: 20px; color: var(--sol-green);">● SYSTEMS OPERATIONAL</div>
-            <h1>Institutional Grade<br>Solana Execution</h1>
-            <p>Access high-frequency arbitrage strategies with sub-millisecond latency. Secured by Multi-MPC technology.</p>
-        </section>
-
-        <section class="specs-grid">
-            <div class="spec-card">
-                <div class="spec-icon">⚡</div>
-                <div class="spec-title">400ms Latency</div>
-                <div class="spec-desc">Direct connection to Jito validators ensures your transactions land in the next block, guaranteed.</div>
-            </div>
-            <div class="spec-card">
-                <div class="spec-icon">🛡️</div>
-                <div class="spec-title">MEV Protection</div>
-                <div class="spec-desc">Transactions are routed through private mempools to prevent sandwich attacks and front-running.</div>
-            </div>
-            <div class="spec-card">
-                <div class="spec-icon">📈</div>
-                <div class="spec-title">AI Volatility Engine</div>
-                <div class="spec-desc">Proprietary algorithms analyze on-chain liquidity depth to execute trades with minimal slippage.</div>
-            </div>
-        </section>
-    </div>
-
-    <div id="loader">
-        <svg width="60" height="60" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#grad2)"/><defs><linearGradient id="grad2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
-        <div class="loader-bar-bg"><div class="loader-bar-fill" id="loader-fill"></div></div>
-        <div class="loader-text" id="loader-msg">INITIALIZING HANDSHAKE...</div>
-    </div>
-
-    <div id="app-container">
-        
-        <div id="auth-overlay">
-            <div class="auth-box">
-                <h2 style="margin-bottom: 5px;">Verify Identity</h2>
-                <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Institutional Access Node</p>
-                <input type="text" id="u_in" class="input-field" placeholder="Terminal ID">
-                <input type="password" id="p_in" class="input-field" placeholder="Access Key">
-                <div id="login-err" style="color: #ff4b4b; font-size: 0.8rem; margin-bottom: 15px; height: 15px;"></div>
-                <button class="btn-grad" style="width: 100%" onclick="System.login()">
-                    <div class="btn-grad-inner">ESTABLISH UPLINK</div>
-                </button>
-            </div>
-        </div>
-
-        <div class="dashboard-layout">
-            <div class="sidebar">
-                <div>
-                    <div class="logo" style="margin-bottom: 40px; font-size: 1rem;">
-                        GRAMVAULT <span style="font-size: 0.6rem; color: var(--sol-green); border: 1px solid var(--sol-green); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">PRO</span>
-                    </div>
-                    <div class="menu-item active">📊 Dashboard</div>
-                    <div class="menu-item">⚡ Strategies</div>
-                    <div class="menu-item">⚙️ Settings</div>
-                </div>
-                <div style="font-size: 0.8rem; color: #444;">
-                    Node: Solana Mainnet-Beta<br>
-                    Ping: 14ms
-                </div>
-            </div>
-
-            <div class="main-content">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
-                    <h2 style="font-weight: 600;">Portfolio Overview</h2>
-                    <div style="display: flex; gap: 15px;">
-                        <div style="background: #111; padding: 8px 16px; border-radius: 8px; font-family: 'JetBrains Mono';" id="clock">00:00:00</div>
-                        <button class="btn-grad" onclick="System.openWithdraw()">
-                            <div class="btn-grad-inner" style="padding: 8px 20px; font-size: 0.85rem;">WITHDRAW</div>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="stats-row">
-                    <div class="stat-card balance-hero">
-                        <div style="color: var(--text-muted); font-size: 0.9rem;">Total Equity</div>
-                        <div class="big-number" id="disp-bal">0.0000 SOL</div>
-                        <div class="pnl green"><span class="live-indicator"></span><span id="disp-pnl">+0.0000</span> (24h)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div style="color: var(--text-muted); font-size: 0.9rem;">Daily Target</div>
-                        <div class="big-number" style="font-size: 1.8rem;">2.40 SOL</div>
-                        <div class="pnl" style="color: #888;">Algorithmic Pace</div>
-                    </div>
-                    <div class="stat-card">
-                        <div style="color: var(--text-muted); font-size: 0.9rem;">Status</div>
-                        <div class="big-number" style="font-size: 1.8rem; color: var(--sol-green);">ACTIVE</div>
-                        <div class="pnl" style="color: #888;">Trading Engine</div>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                        <h4>Performance Analytics</h4>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">LIVE TICKER</div>
-                    </div>
-                    <canvas id="chart-canvas"></canvas>
-                </div>
-
-                <div class="stat-card">
-                    <h4 style="margin-bottom: 20px;">Execution Log</h4>
-                    <div id="tx-log" style="font-family: 'JetBrains Mono'; font-size: 0.85rem;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="withdraw-modal" class="modal">
-        <div class="modal-card">
-            <h3 style="margin-bottom: 20px;">Withdraw Assets</h3>
-            <p style="color: #888; margin-bottom: 20px; font-size: 0.9rem;">Assets will be transferred via SPL standard. Irreversible once confirmed.</p>
-            <input type="text" id="w-addr" class="input-field" placeholder="Solana Wallet Address">
-            <input type="number" id="w-amt" class="input-field" placeholder="Amount (SOL)">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-grad" style="flex: 1" onclick="System.processWithdraw()">
-                    <div class="btn-grad-inner">CONFIRM</div>
-                </button>
-                <button class="btn-grad" style="flex: 1" onclick="System.closeModals()">
-                    <div class="btn-grad-inner" style="background: #222;">CANCEL</div>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="error-modal" class="modal">
-        <div class="modal-card" style="border-top: 2px solid #ff4b4b;">
-            <h3 style="color: #ff4b4b; margin-bottom: 10px;">Transaction Failed</h3>
-            <div style="background: rgba(255, 75, 75, 0.1); color: #ff4b4b; padding: 10px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size: 0.8rem; margin-bottom: 20px;">
-                Error Code: 0x4B3 - Liquidity Threshold
-            </div>
-            <p style="color: #ccc; font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;">
-                The Smart Vault contract requires a minimum collateral buffer to execute withdrawals during high-volatility periods. 
-                <br><br>
-                <strong>Required:</strong> Please add <strong>12.50 SOL</strong> to your balance to unlock full withdrawal capabilities.
+        <header class="hero-section">
+            <div class="hero-badge">● SYSTEM OPERATIONAL: MAINNET-BETA</div>
+            <h1 class="hero-title">Institutional Grade<br>Solana Execution</h1>
+            <p class="hero-subtitle">
+                Access deep liquidity and sub-millisecond latency. Built for high-frequency algorithmic strategies and secure asset custody.
             </p>
-            <button class="btn-grad" style="width: 100%" onclick="System.closeModals()">
-                <div class="btn-grad-inner">ACKNOWLEDGE</div>
-            </button>
+            <div class="flex" style="gap: 20px;">
+                <button class="btn-institutional btn-primary-action" onclick="System.initLoadSequence()">CONNECT WALLET</button>
+                <button class="btn-institutional">READ DOCUMENTATION</button>
+            </div>
+        </header>
+
+        <section class="specs-container">
+            <div class="spec-item">
+                <div class="spec-label">LATENCY</div>
+                <div class="spec-value text-solana">400ms</div>
+                <div class="spec-detail">Direct connection to Jito validators ensures block inclusion.</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-label">SECURITY</div>
+                <div class="spec-value">MPC-512</div>
+                <div class="spec-detail">Multi-party computation ensures private key sharding.</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-label">UPTIME</div>
+                <div class="spec-value">99.99%</div>
+                <div class="spec-detail">Redundant RPC nodes distributed globally.</div>
+            </div>
+        </section>
+        
+        <footer style="text-align: center; padding: 40px; color: #444; font-size: 0.8rem;">
+            &copy; 2026 GRAMVAULT INSTITUTIONAL. SECURED BY SOLANA.
+        </footer>
+    </div>
+
+    <div id="view-loader" class="hidden">
+        <svg width="48" height="48" viewBox="0 0 397 311" fill="none" style="margin-bottom: 24px;"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#14F195"/></svg>
+        <div class="terminal-loader">
+            <div style="display: flex; justify-content: space-between;">
+                <span>SYSTEM BOOT</span>
+                <span id="load-pct">0%</span>
+            </div>
+            <div class="loader-bar"><div class="loader-progress" id="load-bar"></div></div>
+            <div id="load-log" style="height: 100px; overflow: hidden; color: #666;"></div>
         </div>
+    </div>
+
+    <div id="view-dashboard" class="hidden">
+        <aside class="sidebar">
+            <div>
+                <div class="brand-logo" style="font-size: 1.1rem; margin-bottom: 40px;">
+                    GRAMVAULT <span style="font-size: 0.5rem; border: 1px solid #333; padding: 2px 4px; border-radius: 2px; margin-left: 8px;">V4.2</span>
+                </div>
+                
+                <div class="nav-group">
+                    <div class="nav-label">Main</div>
+                    <div class="nav-item active">
+                        <span>●</span> Overview
+                    </div>
+                    <div class="nav-item">
+                        <span>○</span> Analytics
+                    </div>
+                    <div class="nav-item">
+                        <span>○</span> History
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <div class="nav-label">Execution</div>
+                    <div class="nav-item">
+                        <span>○</span> Active Strategies
+                    </div>
+                    <div class="nav-item">
+                        <span>○</span> Risk Engine
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 4px; font-size: 0.75rem; color: #666;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>RPC Latency</span>
+                    <span class="text-solana">14ms</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Block Height</span>
+                    <span class="text-mono" id="block-height">245,110,201</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-pane">
+            <header class="top-bar">
+                <div>
+                    <h2 style="font-weight: 500; font-size: 1.25rem;">Portfolio Overview</h2>
+                    <p style="color: #666; font-size: 0.85rem;">Welcome back, Institutional Operator</p>
+                </div>
+                <div class="flex items-center" style="gap: 16px;">
+                    <div class="text-mono" style="color: #666;" id="clock-display">00:00:00 UTC</div>
+                    <button class="btn-institutional btn-primary-action" onclick="System.toggleModal('modal-withdraw', true)">WITHDRAW</button>
+                </div>
+            </header>
+
+            <div class="balance-section">
+                <div>
+                    <div class="balance-label">
+                        <span style="width: 8px; height: 8px; background: #14F195; border-radius: 50%; box-shadow: 0 0 10px #14F195;"></span>
+                        TOTAL EQUITY
+                    </div>
+                    <div class="balance-amount text-gradient" id="display-balance">30.0000</div>
+                    <div class="balance-usd">≈ $<span id="display-usd">0.00</span> USD</div>
+                </div>
+                <div class="pnl-badge">
+                    +<span id="display-pnl">0.0000</span> SOL (Today)
+                </div>
+            </div>
+
+            <div class="chart-wrapper">
+                <canvas id="chart-canvas"></canvas>
+            </div>
+
+            <h3 style="font-size: 0.9rem; margin-bottom: 20px; color: #888;">RECENT EXECUTION LOG</h3>
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>TYPE</th>
+                        <th>PAIR</th>
+                        <th>AMOUNT</th>
+                        <th>HASH</th>
+                        <th>TIME</th>
+                    </tr>
+                </thead>
+                <tbody id="tx-body">
+                    </tbody>
+            </table>
+        </main>
     </div>
 
     <script>
-        // --- MATHEMATICAL CORE (THE PERSISTENT ENGINE) ---
-        const MathCore = {
-            // CONSTANTS
-            // Jan 1, 2024 00:00:00 UTC - The "Big Bang" of the simulation
-            // Using a fixed past date ensures calculation is identical on every device/browser
-            START_TIMESTAMP: 1704067200000, 
-            BASE_BALANCE: 47.00,
-            TARGET_DAILY: 2.40, // Exact target per day
-            
-            getData() {
-                const now = Date.now();
-                const msElapsed = now - this.START_TIMESTAMP;
-                const secondsElapsed = msElapsed / 1000;
-                const daysElapsed = secondsElapsed / 86400;
+        /**
+         * GRAMVAULT CORE ENGINE v4.2
+         * Architecture: Monolithic Class Structure
+         */
 
-                // 1. Calculate Linear Growth (The "Trend")
-                // 2.4 SOL per day = 0.1 SOL per hour = 0.00166 per minute
-                const linearProfit = daysElapsed * this.TARGET_DAILY;
-
-                // 2. Add "Noise" (Volatility)
-                // Use sine waves based on time so it's deterministic (same output for same time)
-                // This makes it look like it's trading (up and down) but sticking to the trend
-                const noise1 = Math.sin(secondsElapsed / 400) * 0.05; // Slow wave
-                const noise2 = Math.cos(secondsElapsed / 50) * 0.02;  // Fast wave
-                
-                // 3. Current Trade Simulation (Is it up or down right this second?)
-                const tick = Math.sin(secondsElapsed); 
-
-                const totalProfit = linearProfit + noise1 + noise2;
-                const currentBalance = this.BASE_BALANCE + totalProfit;
-
-                return {
-                    balance: currentBalance,
-                    profit: totalProfit,
-                    tick: tick // Positive or negative determines red/green flash
-                };
-            }
+        const Utils = {
+            formatCurrency: (num) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num),
+            formatCrypto: (num) => num.toFixed(4),
+            rand: (min, max) => Math.random() * (max - min) + min,
+            getHash: () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
         };
 
-        // --- SYSTEM CONTROLLER ---
-        const System = {
-            chartData: [],
-            
-            init() {
-                this.renderBackground();
-                // Pre-fill chart with deterministic history
-                let time = Date.now() / 1000 - 3600; // start 1 hour ago
-                for(let i=0; i<60; i++) {
-                    // Quick simulation logic for chart history
-                    time += 60;
-                    const days = (time * 1000 - MathCore.START_TIMESTAMP) / (1000*86400);
-                    const val = MathCore.BASE_BALANCE + (days * MathCore.TARGET_DAILY) + (Math.sin(time/400)*0.05);
-                    this.chartData.push(val);
+        class WebGLRenderer {
+            constructor() {
+                this.canvas = document.getElementById('webgl-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.particles = [];
+                this.initParticles();
+                this.animate();
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            initParticles() {
+                for (let i = 0; i < 60; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        size: Math.random() * 2
+                    });
                 }
-            },
+            }
 
-            startLoad() {
-                document.getElementById('landing-page').style.display = 'none';
-                document.getElementById('loader').style.display = 'flex';
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = '#14F195';
                 
-                const bar = document.getElementById('loader-fill');
-                const txt = document.getElementById('loader-msg');
-                let width = 0;
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+                    
+                    this.ctx.globalAlpha = 0.2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
                 
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        class FinancialEngine {
+            constructor() {
+                // CONFIGURATION
+                // START_EPOCH: Jan 1, 2026 00:00:00 UTC = 1767225600000
+                // This ensures math starts fresh from 2026.
+                this.EPOCH = 1767225600000; 
+                this.BASE_CAPITAL = 30.00; // Starting Amount
+                this.DAILY_YIELD = 2.40;   // Exact 2.4 SOL per day
+                
+                this.chartHistory = [];
+                this.generateHistory();
+            }
+
+            calculate() {
+                const now = Date.now();
+                // If we are somehow before 2026 (unlikely), clamp to 0
+                const diff = Math.max(0, now - this.EPOCH);
+                
+                const daysElapsed = diff / (1000 * 60 * 60 * 24);
+                
+                // Deterministic Growth
+                const organicGrowth = daysElapsed * this.DAILY_YIELD;
+                
+                // Volatility Noise (Sine waves based on time)
+                const noise = (Math.sin(diff / 5000) * 0.02) + (Math.cos(diff / 1200) * 0.01);
+                
+                const total = this.BASE_CAPITAL + organicGrowth + noise;
+                
+                // Calculate "Today's" PnL (Just for display, fake a portion of daily yield)
+                const todaySeconds = (now % 86400000) / 1000;
+                const dailyPace = (todaySeconds / 86400) * this.DAILY_YIELD;
+
+                return {
+                    balance: total,
+                    pnl: dailyPace,
+                    usd: total * 148.50 // Mock SOL Price
+                };
+            }
+
+            generateHistory() {
+                // Create fake history for chart based on the math logic
+                let tempTime = Date.now() - (60 * 60 * 1000); // Start 1 hour ago
+                for(let i=0; i<60; i++) {
+                    tempTime += 60000; // Add minute
+                    const diff = Math.max(0, tempTime - this.EPOCH);
+                    const days = diff / 86400000;
+                    const val = this.BASE_CAPITAL + (days * this.DAILY_YIELD) + (Math.sin(diff/5000)*0.02);
+                    this.chartHistory.push(val);
+                }
+            }
+
+            updateChart(currentVal) {
+                this.chartHistory.push(currentVal);
+                if(this.chartHistory.length > 60) this.chartHistory.shift();
+            }
+        }
+
+        class SystemController {
+            constructor() {
+                this.engine = new FinancialEngine();
+                this.renderer = new WebGLRenderer();
+                this.isLoggedIn = false;
+                
+                // Start Clock
+                setInterval(() => {
+                    const d = new Date();
+                    const t = d.toISOString().split('T')[1].split('.')[0] + " UTC";
+                    const el = document.getElementById('clock-display');
+                    if(el) el.innerText = t;
+                }, 1000);
+            }
+
+            initLoadSequence() {
+                document.getElementById('view-landing').classList.add('hidden');
+                document.getElementById('view-loader').classList.remove('hidden');
+                
+                const logs = [
+                    "Initializing Kernel...", "Loading Modules: NET, CRYPTO, UI", "Connecting to Mainnet-Beta...",
+                    "Handshake: Jito-Solana-Validator-1", "Verifying Integrity...", "Decrypting User Storage...", "SYNC COMPLETE"
+                ];
+                
+                let step = 0;
                 const interval = setInterval(() => {
-                    width += Math.random() * 5;
-                    if(width > 100) width = 100;
-                    bar.style.width = width + '%';
-
-                    if(width < 30) txt.innerText = "CONNECTING TO SOLANA MAINNET...";
-                    else if(width < 60) txt.innerText = "SYNCING RPC NODES [JITO-SOL]...";
-                    else if(width < 90) txt.innerText = "VERIFYING ENCRYPTION KEYS...";
-                    else txt.innerText = "ESTABLISHING SECURE SESSION...";
-
-                    if(width === 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            document.getElementById('loader').style.display = 'none';
-                            document.getElementById('app-container').style.display = 'block';
-                            document.getElementById('auth-overlay').style.display = 'flex';
-                        }, 500);
+                    step++;
+                    const pct = Math.min(100, Math.floor((step / 30) * 100));
+                    document.getElementById('load-bar').style.width = pct + '%';
+                    document.getElementById('load-pct').innerText = pct + '%';
+                    
+                    if(Math.random() > 0.7) {
+                        const log = document.getElementById('load-log');
+                        const item = document.createElement('div');
+                        item.className = 'log-line active';
+                        item.innerText = "> " + (logs[Math.floor(Math.random() * logs.length)] || "Loading assets...");
+                        log.prepend(item);
                     }
-                }, 100); // ~3-4 seconds total
-            },
 
-            login() {
-                const u = document.getElementById('u_in').value;
-                const p = document.getElementById('p_in').value;
+                    if(step >= 30) {
+                        clearInterval(interval);
+                        setTimeout(() => this.showAuth(), 500);
+                    }
+                }, 100); // 3 seconds total
+            }
 
-                if(u === "Groovy9944" && p === "user39zxnlojp") {
-                    document.getElementById('auth-overlay').style.display = 'none';
+            showAuth() {
+                document.getElementById('view-loader').classList.add('hidden');
+                document.getElementById('view-dashboard').classList.remove('hidden'); // Show layout behind
+                this.toggleModal('modal-auth', true);
+            }
+
+            verifyCreds() {
+                const u = document.getElementById('auth-user').value;
+                const p = document.getElementById('auth-pass').value;
+
+                if (u === "Groovy9944" && p === "user39zxnlojp") {
+                    this.toggleModal('modal-auth', false);
+                    this.isLoggedIn = true;
                     this.startLiveFeed();
                 } else {
-                    document.getElementById('login-err').innerText = "INVALID CREDENTIALS // ACCESS DENIED";
+                    const err = document.getElementById('auth-error');
+                    err.innerText = "ACCESS DENIED: INVALID CREDENTIALS";
+                    // Shake effect
+                    const box = document.querySelector('#modal-auth .modal-window');
+                    box.style.transform = "translateX(10px)";
+                    setTimeout(() => box.style.transform = "translateX(0)", 100);
                 }
-            },
+            }
 
             startLiveFeed() {
+                // Update Loop
                 setInterval(() => {
-                    const data = MathCore.getData();
+                    const data = this.engine.calculate();
+                    this.engine.updateChart(data.balance);
                     
-                    // UI Updates
-                    const balEl = document.getElementById('disp-bal');
-                    balEl.innerText = data.balance.toFixed(4) + " SOL";
-                    balEl.style.color = data.tick > 0 ? "#fff" : "#ffcccc"; // Subtle flash
+                    document.getElementById('display-balance').innerText = Utils.formatCrypto(data.balance);
+                    document.getElementById('display-usd').innerText = Utils.formatCurrency(data.usd);
+                    document.getElementById('display-pnl').innerText = Utils.formatCrypto(data.pnl);
                     
-                    document.getElementById('disp-pnl').innerText = "+" + (data.profit % 2.4).toFixed(4); // Show "Daily" progress
-                    
-                    // Clock
-                    const d = new Date();
-                    document.getElementById('clock').innerText = d.toLocaleTimeString('en-US', {hour12: false});
-
-                    // Chart Update
-                    this.chartData.push(data.balance);
-                    if(this.chartData.length > 60) this.chartData.shift();
                     this.drawChart();
-
-                    // Generate Trade Log occasionally
-                    if(Math.random() > 0.7) this.addLogEntry(data.tick > 0);
-
+                    
+                    // Random Log Entry
+                    if(Math.random() > 0.8) this.addLogEntry();
+                    
+                    // Fake Block Height
+                    document.getElementById('block-height').innerText = (245110201 + Math.floor(Date.now()/1000)).toLocaleString();
+                    
                 }, 1000);
-            },
-
-            addLogEntry(isBuy) {
-                const log = document.getElementById('tx-log');
-                const pair = ['SOL-USDC', 'JUP-SOL', 'BONK-SOL'][Math.floor(Math.random()*3)];
-                const amt = (Math.random() * 2).toFixed(2);
-                const time = new Date().toLocaleTimeString().split(' ')[0];
-                
-                const div = document.createElement('div');
-                div.style.marginBottom = "8px";
-                div.style.display = "flex";
-                div.style.justifyContent = "space-between";
-                div.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
-                div.style.paddingBottom = "4px";
-                
-                div.innerHTML = `
-                    <span><span style="color:${isBuy ? 'var(--sol-green)' : '#ff4b4b'}">${isBuy ? 'BUY' : 'SELL'}</span> ${pair}</span>
-                    <span>${amt} SOL <span style="color:#666; font-size:0.7rem">${time}</span></span>
-                `;
-                
-                log.prepend(div);
-                if(log.children.length > 6) log.lastChild.remove();
-            },
+            }
 
             drawChart() {
-                const ctx = document.getElementById('chart-canvas').getContext('2d');
-                const w = ctx.canvas.width = ctx.canvas.clientWidth;
-                const h = ctx.canvas.height = ctx.canvas.clientHeight;
+                const cvs = document.getElementById('chart-canvas');
+                const ctx = cvs.getContext('2d');
+                cvs.width = cvs.clientWidth; cvs.height = cvs.clientHeight;
                 
-                const vals = this.chartData;
-                const min = Math.min(...vals);
-                const max = Math.max(...vals);
+                const data = this.engine.chartHistory;
+                const min = Math.min(...data);
+                const max = Math.max(...data);
                 const range = max - min || 1;
-
-                ctx.clearRect(0,0,w,h);
                 
-                // Gradient
-                const grad = ctx.createLinearGradient(0,0,0,h);
+                ctx.clearRect(0,0,cvs.width,cvs.height);
+                
+                // Gradient Fill
+                const grad = ctx.createLinearGradient(0,0,0,cvs.height);
                 grad.addColorStop(0, 'rgba(20, 241, 149, 0.2)');
                 grad.addColorStop(1, 'rgba(20, 241, 149, 0)');
-
+                
                 ctx.beginPath();
-                ctx.strokeStyle = '#14F195';
-                ctx.lineWidth = 2;
-
-                vals.forEach((v, i) => {
-                    const x = (i / (vals.length-1)) * w;
-                    const y = h - ((v - min) / range) * (h - 20) - 10;
+                data.forEach((val, i) => {
+                    const x = (i / (data.length - 1)) * cvs.width;
+                    const y = cvs.height - ((val - min) / range) * (cvs.height - 40) - 20;
                     if(i===0) ctx.moveTo(x,y);
                     else ctx.lineTo(x,y);
                 });
-
+                
+                ctx.strokeStyle = '#14F195';
+                ctx.lineWidth = 2;
                 ctx.stroke();
-                ctx.lineTo(w, h);
-                ctx.lineTo(0, h);
+                
+                ctx.lineTo(cvs.width, cvs.height);
+                ctx.lineTo(0, cvs.height);
                 ctx.fillStyle = grad;
                 ctx.fill();
-            },
+            }
+
+            addLogEntry() {
+                const tbody = document.getElementById('tx-body');
+                const types = ['BUY', 'SELL', 'ARB'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                const pair = ['SOL/USDC', 'JUP/SOL', 'BONK/SOL'][Math.floor(Math.random() * 3)];
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="${type === 'BUY' ? 'tx-buy' : 'tx-sell'}">${type}</td>
+                    <td>${pair}</td>
+                    <td>${(Math.random() * 5).toFixed(2)} SOL</td>
+                    <td class="text-mono" style="opacity:0.6">${Utils.getHash().substring(0,8)}...</td>
+                    <td>${new Date().toLocaleTimeString()}</td>
+                `;
+                
+                tbody.insertBefore(row, tbody.firstChild);
+                if(tbody.children.length > 5) tbody.removeChild(tbody.lastChild);
+            }
 
             // Modal Logic
-            openWithdraw() { document.getElementById('withdraw-modal').classList.add('active'); },
-            closeModals() { 
-                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); 
-            },
-            processWithdraw() {
-                const addr = document.getElementById('w-addr').value;
-                const amt = document.getElementById('w-amt').value;
-                if(!addr || !amt) return; // Validation
+            toggleModal(id, show) {
+                const el = document.getElementById(id);
+                if(show) el.classList.remove('hidden');
+                else el.classList.add('hidden');
                 
-                document.getElementById('withdraw-modal').classList.remove('active');
-                
-                // Fake processing delay
-                const tempLoader = document.getElementById('loader');
-                const txt = document.getElementById('loader-msg');
-                const fill = document.getElementById('loader-fill');
-                
-                tempLoader.style.display = 'flex';
-                txt.innerText = "BROADCASTING TRANSACTION...";
-                fill.style.width = "0%";
-                document.getElementById('app-container').style.display = 'none';
-
-                setTimeout(() => {
-                    fill.style.width = "100%";
-                    setTimeout(() => {
-                        tempLoader.style.display = 'none';
-                        document.getElementById('app-container').style.display = 'block';
-                        document.getElementById('error-modal').classList.add('active');
-                    }, 500);
-                }, 2000);
-            },
-
-            renderBackground() {
-                const cvs = document.getElementById('particle-canvas');
-                const ctx = cvs.getContext('2d');
-                cvs.width = window.innerWidth; cvs.height = window.innerHeight;
-                
-                const particles = Array.from({length: 50}, () => ({
-                    x: Math.random() * cvs.width,
-                    y: Math.random() * cvs.height,
-                    vx: (Math.random()-0.5) * 0.5,
-                    vy: (Math.random()-0.5) * 0.5,
-                    s: Math.random() * 2
-                }));
-
-                function anim() {
-                    ctx.clearRect(0,0,cvs.width,cvs.height);
-                    ctx.fillStyle = "#14F195";
-                    particles.forEach(p => {
-                        p.x += p.vx; p.y += p.vy;
-                        if(p.x < 0 || p.x > cvs.width) p.vx *= -1;
-                        if(p.y < 0 || p.y > cvs.height) p.vy *= -1;
-                        ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
-                    });
-                    requestAnimationFrame(anim);
+                if(id === 'modal-withdraw' && show) {
+                    const bal = this.engine.calculate().balance;
+                    document.getElementById('withdraw-max').innerText = bal.toFixed(4);
                 }
-                anim();
             }
-        };
 
-        System.init();
+            submitWithdraw() {
+                this.toggleModal('modal-withdraw', false);
+                // Fake processing logic could go here
+                setTimeout(() => {
+                    this.toggleModal('modal-error', true);
+                }, 500);
+            }
+        }
+
+        // Initialize System
+        const System = new SystemController();
     </script>
 </body>
 </html>
