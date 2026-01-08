@@ -2,580 +2,642 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>GRAMVAULT | INSTITUTIONAL EXCHANGE</title>
+    <title>GRAMVAULT | INTEL TERMINAL</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* * ==========================================================================
-         * CORE ARCHITECTURE - GRAMVAULT ULTRA
-         * ========================================================================== */
         :root {
-            --bg-deep: #050505;
-            --bg-panel: #0E0E0E;
-            --bg-card: rgba(20, 20, 20, 0.7);
+            /* Axiom-Inspired Palette */
+            --bg-root: #09090b;
+            --bg-panel: #121214;
+            --bg-card: #18181b;
+            --border-color: #27272a;
+            --border-hover: #3f3f46;
             
-            --col-sol: #9945FF;
-            --col-sol-sec: #14F195;
-            --col-bonk: #FFA500;
-            --col-error: #FF2E2E;
-            --col-text: #FFFFFF;
-            --col-mute: #888888;
-            --col-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #14F195; /* Solana Green */
+            --accent-purple: #9945FF;
+            --accent-danger: #ef4444;
+            --accent-success: #22c55e;
+            --accent-warn: #eab308;
+            
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+            --text-dim: #52525b;
 
-            --font-main: 'Inter', sans-serif;
+            --font-ui: 'Inter', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
-            --font-head: 'Space Grotesk', sans-serif;
 
-            --glass: blur(20px);
-            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+            --header-h: 64px;
+            --sidebar-w: 260px;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
-            background-color: var(--bg-deep);
-            color: var(--col-text);
-            font-family: var(--font-main);
+            margin: 0; padding: 0;
+            background-color: var(--bg-root);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            font-size: 13px;
             height: 100vh;
             overflow: hidden;
-            background-image: 
-                radial-gradient(circle at 0% 0%, rgba(153, 69, 255, 0.05), transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(20, 241, 149, 0.05), transparent 40%);
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- ASSETS & ANIMATIONS --- */
-        .floating-assets {
-            position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
-        }
-        .float-item {
-            position: absolute; opacity: 0.15; filter: drop-shadow(0 0 20px rgba(255,255,255,0.1));
-            animation: float 20s infinite ease-in-out;
-        }
-        .float-item:nth-child(1) { top: 10%; left: 10%; width: 100px; animation-duration: 25s; } /* SOL */
-        .float-item:nth-child(2) { top: 60%; right: 15%; width: 80px; animation-duration: 30s; animation-delay: -5s; } /* BONK */
-        .float-item:nth-child(3) { bottom: 10%; left: 20%; width: 60px; animation-duration: 22s; animation-delay: -10s; } /* WIF */
-
-        @keyframes float { 
-            0%, 100% { transform: translate(0, 0) rotate(0deg); } 
-            33% { transform: translate(30px, -50px) rotate(10deg); } 
-            66% { transform: translate(-20px, 20px) rotate(-5deg); } 
-        }
-
-        /* --- TICKER TAPE --- */
-        .ticker-wrap {
-            position: fixed; top: 0; width: 100%; height: 30px; background: #000; border-bottom: 1px solid var(--col-border);
-            z-index: 100; overflow: hidden; display: flex; align-items: center;
-        }
-        .ticker { display: flex; animation: ticker 30s linear infinite; white-space: nowrap; }
-        .ticker-item { 
-            padding: 0 30px; font-family: var(--font-mono); font-size: 0.75rem; display: flex; gap: 8px; 
-            color: #aaa; text-transform: uppercase;
-        }
-        .t-up { color: var(--col-sol-sec); } .t-down { color: var(--col-error); }
-        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        /* --- UTILITIES --- */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .text-mono { font-family: var(--font-mono); }
+        .text-green { color: var(--accent-primary); }
+        .text-red { color: var(--accent-danger); }
+        .text-purple { color: var(--accent-purple); }
+        .hidden { display: none !important; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-root); }
+        ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
         /* --- COMPONENTS --- */
-        .btn-pro {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--col-border); color: #fff;
-            padding: 12px 24px; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600;
-            cursor: pointer; transition: 0.3s var(--ease); display: inline-flex; align-items: center; gap: 8px;
-            text-transform: uppercase; letter-spacing: 0.5px;
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px; justify-content: center;
         }
-        .btn-pro:hover { background: rgba(20, 241, 149, 0.05); border-color: var(--col-sol-sec); color: var(--col-sol-sec); }
-        .btn-pro.accent { background: var(--col-sol-sec); color: #000; border: none; }
-        .btn-pro.accent:hover { background: #fff; box-shadow: 0 0 20px rgba(20, 241, 149, 0.4); }
+        .btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+        .btn-primary { background: var(--accent-primary); color: #000; border: none; font-weight: 600; }
+        .btn-primary:hover { background: #10b981; color: #000; transform: translateY(-1px); }
+        .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
 
-        .input-pro {
-            width: 100%; background: #000; border: 1px solid var(--col-border); color: #fff;
-            padding: 16px; font-family: var(--font-mono); font-size: 0.9rem; transition: 0.3s;
+        .badge {
+            font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 6px;
+            border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted);
         }
-        .input-pro:focus { border-color: var(--col-sol-sec); }
+        .badge.green { background: rgba(20, 241, 149, 0.1); color: var(--accent-primary); }
+        
+        .input-dark {
+            background: #000; border: 1px solid var(--border-color); color: #fff;
+            padding: 10px; border-radius: 6px; width: 100%; font-family: var(--font-mono);
+            font-size: 0.9rem; transition: 0.2s;
+        }
+        .input-dark:focus { border-color: var(--accent-primary); }
 
-        /* --- LAYOUTS --- */
-        #view-main { 
-            display: grid; grid-template-columns: 240px 1fr; height: 100vh; padding-top: 30px; 
-            position: relative; z-index: 10;
+        /* --- LAYOUT: HEADER --- */
+        .app-header {
+            height: var(--header-h);
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0; z-index: 50;
         }
+
+        .logo { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+        .logo span { color: var(--accent-primary); }
         
-        .sidebar {
-            background: var(--bg-panel); border-right: 1px solid var(--col-border);
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
-        
+        .nav-links { display: flex; gap: 4px; }
         .nav-btn {
-            padding: 15px 20px; color: var(--col-mute); cursor: pointer; display: flex; align-items: center; gap: 12px;
-            font-size: 0.9rem; transition: 0.2s; border-left: 2px solid transparent;
+            padding: 8px 12px; border-radius: 6px; color: var(--text-muted); cursor: pointer;
+            font-size: 0.9rem; transition: 0.2s;
         }
-        .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.03); color: #fff; border-left-color: var(--col-sol-sec); }
-        
-        .content-area { overflow-y: auto; padding: 30px; position: relative; }
-        .page { display: none; animation: fadeIn 0.4s ease; }
-        .page.active { display: block; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn:hover, .nav-btn.active { background: var(--bg-card); color: #fff; }
 
-        /* --- DASHBOARD ELEMENTS --- */
-        .grid-dash { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .card { 
-            background: var(--bg-card); border: 1px solid var(--col-border); backdrop-filter: var(--glass);
-            padding: 24px; position: relative;
+        /* --- LAYOUT: MAIN --- */
+        .app-body { flex: 1; display: flex; overflow: hidden; position: relative; }
+        
+        /* Sidebar (Left) - Navigation & User */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        /* Right Panel - The "Alpha Feed" */
+        .alpha-feed {
+            width: 300px;
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        /* Center Content */
+        .main-view {
+            flex: 1; background: var(--bg-root); overflow-y: auto; padding: 20px;
+            display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px;
+            align-content: start;
+        }
+
+        /* --- CARDS & WIDGETS --- */
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex; flex-direction: column;
         }
         
-        .bal-hero { font-family: var(--font-head); font-size: 3.5rem; font-weight: 700; line-height: 1; margin: 10px 0; letter-spacing: -1px; }
-        .bal-sub { font-family: var(--font-mono); color: var(--col-mute); }
-
-        /* ORDER BOOK */
-        .order-book { font-family: var(--font-mono); font-size: 0.75rem; }
-        .ob-row { display: flex; justify-content: space-between; padding: 4px 0; }
-        .ob-buy { color: var(--col-sol-sec); } .ob-sell { color: var(--col-error); }
-
-        /* MODALS */
-        .modal { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; 
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+        .panel-head {
+            padding: 12px 16px; border-bottom: 1px solid var(--border-color);
+            font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .modal.active { display: flex; }
-        .modal-box { 
-            background: #111; border: 1px solid var(--col-border); width: 100%; max-width: 500px; padding: 40px; 
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        
+        /* Portfolio Header Widget */
+        .portfolio-hero {
+            grid-column: span 12;
+            background: linear-gradient(180deg, rgba(20,241,149,0.05) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 24px;
+            display: flex; justify-content: space-between; align-items: flex-end;
         }
+        
+        .hero-bal { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        .hero-pnl { color: var(--accent-primary); font-family: var(--font-mono); margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+
+        /* Sniper/Trade Widget */
+        .trade-widget { grid-column: span 4; }
+        .chart-widget { grid-column: span 8; height: 400px; }
+        .discovery-widget { grid-column: span 12; }
+
+        /* Intel Feed Items */
+        .feed-item {
+            padding: 12px 16px; border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem; display: flex; gap: 10px;
+        }
+        .feed-icon { width: 32px; height: 32px; border-radius: 50%; background: #222; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+
+        /* Discovery Table */
+        .table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.8rem; }
+        .table th { text-align: left; color: var(--text-muted); padding: 12px; font-weight: 500; border-bottom: 1px solid var(--border-color); }
+        .table td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .table tr:last-child td { border: none; }
+        .table tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* --- MODALS --- */
+        .modal-bg {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            z-index: 999; display: flex; align-items: center; justify-content: center;
+        }
+        .modal {
+            background: #09090b; border: 1px solid var(--border-color);
+            width: 100%; max-width: 440px; border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* Loader */
+        .loader-bar { height: 2px; width: 100%; background: #222; position: relative; overflow: hidden; }
+        .loader-prog { position: absolute; height: 100%; background: var(--accent-primary); width: 0%; transition: width 0.2s; }
 
         /* RESPONSIVE */
-        @media (max-width: 900px) {
-            #view-main { grid-template-columns: 1fr; grid-template-rows: 1fr 60px; }
-            .sidebar { 
-                order: 2; flex-direction: row; border-right: none; border-top: 1px solid var(--col-border);
-                overflow-x: auto; padding: 0;
-            }
-            .sidebar .logo-area, .sidebar .status-area { display: none; }
-            .nav-btn { flex: 1; justify-content: center; padding: 0; flex-direction: column; font-size: 0.6rem; gap: 5px; }
-            .content-area { padding: 15px; padding-bottom: 80px; }
-            .grid-dash { grid-template-columns: 1fr; }
+        @media (max-width: 1200px) {
+            .alpha-feed { display: none; }
+            .trade-widget { grid-column: span 12; }
+            .chart-widget { grid-column: span 12; }
         }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .portfolio-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .hero-bal { font-size: 2rem; }
+            .main-view { padding: 10px; }
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="floating-assets">
-        <svg class="float-item" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#g1)"/><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
-        <svg class="float-item" viewBox="0 0 100 100" fill="#FFA500"><circle cx="50" cy="50" r="40"/><path d="M30 40h40v20h-40z" fill="#000"/></svg>
-        <svg class="float-item" viewBox="0 0 100 100" fill="#fff"><path d="M20 60h60v20H20zM30 60V40h40v20" fill="#E8B595"/></svg>
-    </div>
-
-    <div class="ticker-wrap">
-        <div class="ticker">
-            <div class="ticker-item">SOL/USDC <span class="t-up">+4.2%</span></div>
-            <div class="ticker-item">BTC/USDC <span class="t-down">-0.5%</span></div>
-            <div class="ticker-item">BONK/SOL <span class="t-up">+12.4%</span></div>
-            <div class="ticker-item">JUP/SOL <span class="t-up">+1.8%</span></div>
-            <div class="ticker-item">WIF/SOL <span class="t-up">+8.9%</span></div>
-            <div class="ticker-item">PYTH/USDC <span class="t-down">-1.2%</span></div>
-            <div class="ticker-item">SOL/USDC <span class="t-up">+4.2%</span></div>
-            <div class="ticker-item">BTC/USDC <span class="t-down">-0.5%</span></div>
-            <div class="ticker-item">BONK/SOL <span class="t-up">+12.4%</span></div>
-        </div>
-    </div>
-
-    <div id="view-login" style="position:fixed; inset:0; z-index:200; background:#000; display:flex; align-items:center; justify-content:center;">
-        <div style="text-align:center; max-width:400px; padding:20px;">
-            <h1 style="font-family: var(--font-head); font-size:3rem; margin-bottom:10px;">GRAMVAULT</h1>
-            <p style="color:#666; font-family: var(--font-mono); margin-bottom:40px;">INSTITUTIONAL ACCESS // V4.5</p>
-            
-            <input type="text" id="login-u" class="input-pro" placeholder="TERMINAL ID" style="margin-bottom:10px;">
-            <input type="password" id="login-p" class="input-pro" placeholder="ACCESS KEY" style="margin-bottom:20px;">
-            <div id="login-msg" style="color:var(--col-error); font-size:0.8rem; height:20px; margin-bottom:10px;"></div>
-            
-            <button class="btn-pro accent" style="width:100%; justify-content:center;" onclick="Sys.login()">
-                AUTHENTICATE
-            </button>
-            <button class="btn-pro" style="width:100%; justify-content:center; margin-top:10px; background:transparent;" onclick="Sys.showDocs()">
-                READ DOCUMENTATION
-            </button>
-        </div>
-    </div>
-
-    <div id="view-main" style="display:none;">
-        <aside class="sidebar">
-            <div>
-                <div class="logo-area" style="padding: 30px 20px;">
-                    <h2 style="font-family: var(--font-head);">GRAMVAULT</h2>
-                    <div style="font-size:0.7rem; color:var(--col-sol-sec);">● MAINNET CONNECTED</div>
-                </div>
+    <div id="view-login" class="modal-bg">
+        <div class="modal">
+            <div style="padding: 30px; text-align: center;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">⚡</div>
+                <h2 style="margin: 0 0 8px 0;">GRAMVAULT TERMINAL</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Institutional Intel & Execution Layer</p>
                 
-                <div class="nav-btn active" onclick="Sys.nav('dashboard', this)">
-                    <span>📊</span> DASHBOARD
-                </div>
-                <div class="nav-btn" onclick="Sys.nav('analytics', this)">
-                    <span>📈</span> ANALYTICS
-                </div>
-                <div class="nav-btn" onclick="Sys.nav('history', this)">
-                    <span>📜</span> HISTORY
-                </div>
-                <div class="nav-btn" onclick="Sys.nav('risk', this)">
-                    <span>🛡️</span> RISK ENGINE
-                </div>
+                <input type="text" id="user-in" class="input-dark" placeholder="Terminal ID" style="margin-bottom: 10px;">
+                <input type="password" id="pass-in" class="input-dark" placeholder="Access Key" style="margin-bottom: 20px;">
+                
+                <div id="login-msg" style="color: var(--accent-danger); font-size: 0.8rem; height: 20px; margin-bottom: 10px;"></div>
+                
+                <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="App.login()">LOGIN</button>
+                <div style="margin-top: 20px; font-size: 0.8rem; color: #444;">V4.4.2 STABLE // MAINNET</div>
             </div>
-            
-            <div class="status-area" style="padding:20px; border-top:1px solid var(--col-border); font-size:0.75rem; color:#666;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <span>LATENCY</span> <span style="color:var(--col-sol-sec)">12ms</span>
-                </div>
-                <div style="display:flex; justify-content:space-between;">
-                    <span>RPC</span> <span>JITO-1</span>
-                </div>
-            </div>
-        </aside>
+        </div>
+    </div>
 
-        <main class="content-area">
+    <header class="app-header">
+        <div class="flex items-center gap-4">
+            <div class="logo">GRAM<span>VAULT</span></div>
+            <div class="nav-links hidden-mobile" style="margin-left: 20px;">
+                <div class="nav-btn active">Terminal</div>
+                <div class="nav-btn">Strategies</div>
+                <div class="nav-btn" onclick="App.openDocs()">Docs</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="badge green flex items-center gap-2">
+                <span style="width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: pulse 1s infinite;"></span>
+                LIVE
+            </div>
+            <div class="text-mono" style="font-size: 0.8rem; color: var(--text-muted);" id="clock">00:00:00</div>
+            <button class="btn btn-primary btn-sm" onclick="App.openWithdraw()">WITHDRAW</button>
+        </div>
+    </header>
+
+    <div class="app-body">
+        
+        <div class="sidebar">
+            <div style="padding: 20px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase;">My Portfolio</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span style="color: #fff; font-weight: 600;">Main Wallet</span>
+                    <span class="text-mono text-green">$<span id="side-usd">0.00</span></span>
+                </div>
+                <div class="text-mono" style="font-size: 0.8rem; color: #666;">8x...3J9a</div>
+            </div>
+            <div style="border-top: 1px solid var(--border-color);"></div>
+            <div style="padding: 20px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase;">Watchlist</div>
+                <div id="watchlist-container">
+                    </div>
+            </div>
+        </div>
+
+        <div class="main-view">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <div class="portfolio-hero">
                 <div>
-                    <h2 style="font-family: var(--font-head);">PORTFOLIO</h2>
-                    <div class="font-mono" style="color:#666; font-size:0.8rem;" id="clock">00:00:00 UTC</div>
+                    <div style="color: var(--text-muted); margin-bottom: 8px;">Net Liquidity Value</div>
+                    <div class="hero-bal"><span id="main-bal">0.0000</span> SOL</div>
+                    <div class="hero-pnl">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
+                        <span id="main-pnl">0.0000</span> (24h)
+                    </div>
                 </div>
-                <button class="btn-pro accent" onclick="Sys.showWithdraw()">WITHDRAW FUNDS</button>
-            </div>
-
-            <div id="p-dashboard" class="page active">
-                <div class="grid-dash">
-                    <div class="card" style="grid-column: span 2;">
-                        <div style="font-size:0.8rem; color:#888; margin-bottom:10px;">TOTAL EQUITY VALUE</div>
-                        <div class="bal-hero" id="disp-bal">0.0000</div>
-                        <div class="bal-sub">≈ $<span id="disp-usd">0.00</span> USD</div>
-                        <div style="margin-top:20px; display:flex; gap:10px;">
-                            <div style="background:rgba(20,241,149,0.1); color:var(--col-sol-sec); padding:5px 10px; font-size:0.8rem;">+<span id="disp-pnl">0.00</span> SOL (24h)</div>
-                            <div style="background:rgba(153,69,255,0.1); color:var(--col-sol); padding:5px 10px; font-size:0.8rem;">Delta Neutral</div>
-                        </div>
+                <div class="flex gap-4">
+                    <div class="text-right">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Unrealized PnL</div>
+                        <div class="text-mono text-green">+14.2%</div>
                     </div>
-
-                    <div class="card" style="grid-column: span 2; height: 350px; display:flex; flex-direction:column;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                            <span style="font-size:0.8rem; color:#888;">PERFORMANCE (REAL-TIME)</span>
-                            <span style="font-size:0.8rem; color:var(--col-sol-sec);">● LIVE</span>
-                        </div>
-                        <div style="flex:1; position:relative;">
-                            <canvas id="chart-cvs"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="card" style="grid-column: span 2;">
-                        <div style="font-size:0.8rem; color:#888; margin-bottom:15px;">RECENT INSTITUTIONAL EXECUTIONS</div>
-                        <div class="order-book" id="tx-log">
-                            </div>
+                    <div class="text-right">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Daily Yield</div>
+                        <div class="text-mono text-purple">2.40 SOL</div>
                     </div>
                 </div>
             </div>
 
-            <div id="p-analytics" class="page">
-                <div class="card">
-                    <h3 style="margin-bottom:20px;">STRATEGY PERFORMANCE</h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-                        <div style="background:#111; padding:20px;">
-                            <div style="color:#666; font-size:0.8rem;">WIN RATE</div>
-                            <div style="font-size:1.5rem; color:var(--col-sol-sec);">98.4%</div>
-                        </div>
-                        <div style="background:#111; padding:20px;">
-                            <div style="color:#666; font-size:0.8rem;">TOTAL TRADES</div>
-                            <div style="font-size:1.5rem;">12,402</div>
-                        </div>
-                        <div style="background:#111; padding:20px;">
-                            <div style="color:#666; font-size:0.8rem;">AVG. APY</div>
-                            <div style="font-size:1.5rem; color:var(--col-sol);">2,450%</div>
-                        </div>
+            <div class="panel trade-widget">
+                <div class="panel-head">
+                    <span>EXECUTION</span>
+                    <span class="badge">SNIPER MODE</span>
+                </div>
+                <div style="padding: 20px;">
+                    <div class="flex justify-between" style="margin-bottom: 10px;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Buy Amount (SOL)</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Balance: <span id="trade-bal">0.00</span></span>
                     </div>
-                    <div style="margin-top:30px; font-family:var(--font-mono); color:#888; font-size:0.8rem;">
-                        Detailed breakdown of MEV-protected arbitrage routes via Jupiter Aggregator.
+                    <div class="flex gap-2" style="margin-bottom: 15px;">
+                        <button class="btn btn-sm">0.5</button>
+                        <button class="btn btn-sm">1.0</button>
+                        <button class="btn btn-sm">5.0</button>
                     </div>
+                    <input type="number" class="input-dark" placeholder="0.00" style="margin-bottom: 20px;">
+                    
+                    <div class="flex justify-between items-center" style="margin-bottom: 10px; font-size: 0.8rem;">
+                        <span style="color: var(--text-muted);">Slippage</span>
+                        <span class="text-mono text-warn">Auto (1.5%)</span>
+                    </div>
+                    <div class="flex justify-between items-center" style="margin-bottom: 20px; font-size: 0.8rem;">
+                        <span style="color: var(--text-muted);">Priority Fee</span>
+                        <span class="text-mono text-green">Turbo (0.005)</span>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%;">QUICK BUY</button>
                 </div>
             </div>
 
-            <div id="p-history" class="page">
-                <div class="card">
-                    <h3 style="margin-bottom:20px;">TRANSACTION HISTORY</h3>
-                    <table style="width:100%; font-family:var(--font-mono); font-size:0.8rem; border-collapse:collapse;">
-                        <thead><tr style="text-align:left; color:#666;"><th style="padding:10px;">ID</th><th>TYPE</th><th>ASSET</th><th>AMOUNT</th></tr></thead>
-                        <tbody id="hist-body"></tbody>
-                    </table>
+            <div class="panel chart-widget">
+                <div class="panel-head">
+                    <span>SOL/USDC • 15m</span>
+                    <div class="flex gap-2">
+                        <span class="badge">Price: $148.52</span>
+                        <span class="badge green">+2.4%</span>
+                    </div>
+                </div>
+                <div style="flex: 1; position: relative; background: #000;">
+                    <canvas id="chart-canvas" style="width: 100%; height: 100%;"></canvas>
                 </div>
             </div>
 
-            <div id="p-risk" class="page">
-                <div class="card" style="border-top:2px solid var(--col-sol);">
-                    <h3 style="margin-bottom:20px;">RISK PARAMETERS</h3>
-                    <div style="margin-bottom:15px; display:flex; justify-content:space-between; border-bottom:1px solid #333; padding-bottom:10px;">
-                        <span>Max Drawdown Limit</span> <span style="color:var(--col-sol-sec)">0.5%</span>
-                    </div>
-                    <div style="margin-bottom:15px; display:flex; justify-content:space-between; border-bottom:1px solid #333; padding-bottom:10px;">
-                        <span>Leverage Cap</span> <span>1.2x</span>
-                    </div>
-                    <div style="margin-bottom:15px; display:flex; justify-content:space-between; border-bottom:1px solid #333; padding-bottom:10px;">
-                        <span>Collateral Health</span> <span style="color:var(--col-sol-sec)">100% (EXCELLENT)</span>
+            <div class="panel discovery-widget">
+                <div class="panel-head">
+                    <span>MEMECOIN DISCOVERY (LIVE)</span>
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm">Trending</button>
+                        <button class="btn btn-sm" style="opacity: 0.5;">New Pairs</button>
                     </div>
                 </div>
+                <table class="table">
+                    <thead><tr><th>Token</th><th>Price</th><th>Age</th><th>Vol 24h</th><th>PnL</th><th>Action</th></tr></thead>
+                    <tbody id="discovery-body"></tbody>
+                </table>
             </div>
 
-        </main>
-    </div>
-
-    <div id="modal-docs" class="modal">
-        <div class="modal-box">
-            <h2 style="font-family:var(--font-head); margin-bottom:20px;">STRATEGY WHITEPAPER</h2>
-            <div style="height:300px; overflow-y:auto; padding-right:10px;">
-                <p style="margin-bottom:15px; color:#aaa; font-size:0.9rem;">
-                    <strong>01. FRACTAL ARBITRAGE</strong><br>
-                    Our engine uses a proprietary fractal algorithm to detect price discrepancies across Raydium and Orca. Execution time: &lt;400ms.
-                </p>
-                <p style="margin-bottom:15px; color:#aaa; font-size:0.9rem;">
-                    <strong>02. MEV SHIELD</strong><br>
-                    All trades are routed through Jito private mempools, ensuring zero front-running.
-                </p>
-                <p style="margin-bottom:15px; color:#aaa; font-size:0.9rem;">
-                    <strong>03. YIELD</strong><br>
-                    Target: 2.4 SOL daily. Compounding occurs every 4 hours.
-                </p>
-            </div>
-            <button class="btn-pro" style="width:100%; margin-top:20px; justify-content:center;" onclick="Sys.closeModal()">CLOSE</button>
         </div>
+
+        <div class="alpha-feed">
+            <div class="panel-head">INTEL FEED</div>
+            <div id="intel-container" style="overflow-y: auto; flex: 1;">
+                </div>
+        </div>
+
     </div>
 
-    <div id="modal-withdraw" class="modal">
-        <div class="modal-box">
-            <h2 style="margin-bottom:20px;">WITHDRAW ASSETS</h2>
-            <div style="margin-bottom:20px;">
-                <label style="font-size:0.7rem; color:#888;">DESTINATION</label>
-                <input class="input-pro" placeholder="Solana Address">
+    <div id="modal-docs" class="modal-bg hidden">
+        <div class="modal">
+            <div class="modal-body">
+                <h3>Strategy Documentation</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+                    <strong>01. MEV Protection</strong><br>
+                    Transactions routed via private Jito executors to prevent sandwich attacks.
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    <strong>02. Yield Engine</strong><br>
+                    Daily target of 2.40 SOL generated via atomic arbitrage loops on Raydium/Orca.
+                </p>
             </div>
-            <div style="margin-bottom:20px;">
-                <label style="font-size:0.7rem; color:#888;">AMOUNT</label>
-                <input type="number" id="w-amt" class="input-pro" placeholder="0.00">
-                <div style="text-align:right; font-size:0.7rem; color:var(--col-sol-sec); margin-top:5px;">Available: <span id="w-max">0.00</span> SOL</div>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-pro" style="flex:1; justify-content:center;" onclick="Sys.closeModal()">CANCEL</button>
-                <button class="btn-pro accent" style="flex:1; justify-content:center;" onclick="Sys.doWithdraw()">CONFIRM</button>
+            <div class="modal-footer">
+                <button class="btn" style="width: 100%;" onclick="App.closeModal('modal-docs')">Close</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-loading" class="modal">
-        <div class="modal-box" style="text-align:center;">
-            <div style="width:50px; height:50px; border:3px solid #333; border-top:3px solid var(--col-sol-sec); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 20px auto;"></div>
-            <h3>PROCESSING</h3>
-            <div id="load-text" style="color:#888; font-family:var(--font-mono); font-size:0.8rem; margin-top:10px;">Init...</div>
-            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+    <div id="modal-withdraw" class="modal-bg hidden">
+        <div class="modal">
+            <div class="modal-body">
+                <h3>Withdraw Assets</h3>
+                <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Destination Address</label>
+                <input type="text" class="input-dark" placeholder="Solana Address" style="margin-bottom: 15px;">
+                <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Amount</label>
+                <input type="number" class="input-dark" placeholder="0.00" style="margin-bottom: 10px;">
+                <div class="text-right" style="font-size: 0.8rem; color: var(--text-muted);">Max: <span class="text-green" id="wd-max">0.00</span></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" style="flex: 1;" onclick="App.closeModal('modal-withdraw')">Cancel</button>
+                <button class="btn btn-primary" style="flex: 1;" onclick="App.submitWithdraw()">Confirm</button>
+            </div>
         </div>
     </div>
 
-    <div id="modal-error" class="modal">
-        <div class="modal-box" style="border-top:3px solid var(--col-error);">
-            <div style="color:var(--col-error); font-size:2rem; margin-bottom:10px;">⚠ SECURITY ALERT</div>
-            <p style="color:#ccc; font-size:0.9rem; line-height:1.5; margin-bottom:20px;">
-                Institutional withdrawal detected. Due to high leverage usage, the smart contract requires a <strong>Refundable Collateral</strong> to settle the position.
-            </p>
-            <div style="background:rgba(20,241,149,0.1); border:1px solid var(--col-sol-sec); padding:15px; border-radius:4px; margin-bottom:20px;">
-                <div style="font-size:0.7rem; color:var(--col-sol-sec);">REQUIRED ACTION</div>
-                <div style="font-size:1.2rem; font-weight:700;">Deposit 9.7 SOL</div>
+    <div id="modal-loader" class="modal-bg hidden">
+        <div class="modal" style="text-align: center;">
+            <div class="modal-body">
+                <div style="width: 40px; height: 40px; border: 3px solid #222; border-top: 3px solid var(--accent-primary); border-radius: 50%; margin: 0 auto 20px auto; animation: spin 1s infinite linear;"></div>
+                <h4 style="margin: 0 0 10px 0;">Verifying Protocol</h4>
+                <div id="load-text" style="color: var(--text-muted); font-size: 0.9rem; font-family: var(--font-mono);">Initiating Handshake...</div>
             </div>
-            <p style="color:#666; font-size:0.8rem; margin-bottom:20px;">*Funds are released instantly after verification (approx. 3 mins).</p>
-            <button class="btn-pro" style="width:100%; justify-content:center;" onclick="Sys.closeModal()">ACKNOWLEDGE</button>
+        </div>
+    </div>
+
+    <div id="modal-error" class="modal-bg hidden">
+        <div class="modal" style="border-top: 4px solid var(--accent-danger);">
+            <div class="modal-body">
+                <div style="color: var(--accent-danger); font-size: 2rem; margin-bottom: 10px;">🛡️</div>
+                <h3 style="margin: 0 0 10px 0;">Security Verification Required</h3>
+                <p style="font-size: 0.9rem; color: #d4d4d8; line-height: 1.5; margin-bottom: 20px;">
+                    Your account has generated significant profit via high-frequency leverage. To finalize withdrawal, the Smart Contract requires a <strong>one-time refundable collateral</strong>.
+                </p>
+                <div style="background: rgba(20,241,149,0.1); border: 1px solid var(--accent-primary); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                    <div style="font-size: 0.75rem; color: var(--accent-primary); font-weight: 600;">PENDING ACTION</div>
+                    <div style="font-size: 1.1rem; font-weight: 700;">Deposit 9.7 SOL Collateral</div>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
+                    *Collateral is 100% refundable immediately after blockchain verification (approx. 5 mins).
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" style="width: 100%;" onclick="App.closeModal('modal-error')">I Understand</button>
+            </div>
         </div>
     </div>
 
     <script>
-        /* * GRAMVAULT ENGINE V5
-         * FRACTAL MARKET GENERATOR & INSTITUTIONAL SIMULATION
-         */
-        
-        const Engine = {
-            START: 1767225600000, // Jan 1 2026
+        // --- LOGIC ENGINE ---
+        const Logic = {
+            EPOCH: 1767225600000, // Jan 1 2026
             BASE: 30.00,
-            RATE: 2.40, // Daily growth
-
+            RATE: 2.40,
+            
             getData() {
                 const now = Date.now();
-                const diff = Math.max(0, now - this.START);
+                const diff = Math.max(0, now - this.EPOCH);
                 const days = diff / 86400000;
-                
-                // Deterministic Growth
-                const growth = days * this.RATE;
-                
-                // Noise based on time
-                const noise = Math.sin(now/5000) * 0.05;
-                
-                const bal = this.BASE + growth + noise;
-                const daily = ((now % 86400000) / 86400000) * this.RATE;
-                
-                return { bal, daily, usd: bal * 145.20 };
-            },
-
-            // NEW: FRACTAL RANDOM WALK (Non-looping charts)
-            getChartData() {
-                // Seed based on the hour to keep it consistent but changing
-                const seed = Math.floor(Date.now() / 3600000); 
-                let data = [];
-                let val = this.getData().bal;
-                
-                // Reverse generate 100 points
-                for(let i=0; i<100; i++) {
-                    data.unshift(val);
-                    // Random walk step
-                    const delta = (Math.sin((seed + i) * 0.5) * 0.05) + ((Math.random()-0.5) * 0.02);
-                    val -= delta; 
-                }
-                return data;
+                const bal = this.BASE + (days * this.RATE) + (Math.sin(diff/5000)*0.02);
+                const todaySec = (now % 86400000) / 1000;
+                const pnl = (todaySec / 86400) * this.RATE;
+                return { bal, pnl, usd: bal * 148.52 };
             }
         };
 
-        const Sys = {
-            chartData: [],
-            
+        const App = {
             init() {
-                this.updateClock();
-                setInterval(() => this.updateClock(), 1000);
+                // Clock
+                setInterval(() => {
+                    document.getElementById('clock').innerText = new Date().toISOString().split('T')[1].split('.')[0] + " UTC";
+                }, 1000);
+                
+                // Chart Init
+                this.initChart();
+                this.genWatchlist();
+                this.genDiscovery();
+                this.startIntel();
             },
 
+            // --- NAVIGATION ---
             login() {
-                const u = document.getElementById('login-u').value;
-                const p = document.getElementById('login-p').value;
+                const u = document.getElementById('user-in').value;
+                const p = document.getElementById('pass-in').value;
                 if(u === "Groovy9944" && p === "user39zxnlojp") {
-                    document.getElementById('view-login').style.display = 'none';
-                    document.getElementById('view-main').style.display = 'grid';
+                    document.getElementById('view-login').classList.add('hidden');
                     this.startLive();
-                    this.genHistory();
                 } else {
-                    document.getElementById('login-msg').innerText = "INVALID CREDENTIALS";
+                    document.getElementById('login-msg').innerText = "ACCESS DENIED";
                 }
             },
-
+            
             startLive() {
                 setInterval(() => {
-                    const d = Engine.getData();
-                    document.getElementById('disp-bal').innerText = d.bal.toFixed(4);
-                    document.getElementById('disp-usd').innerText = d.usd.toLocaleString('en-US', {minimumFractionDigits:2});
-                    document.getElementById('disp-pnl').innerText = d.daily.toFixed(4);
-                    
-                    // Chart Update
-                    this.drawChart();
-                    
-                    // Order Book
-                    if(Math.random() > 0.5) this.addLog();
+                    const d = Logic.getData();
+                    document.getElementById('main-bal').innerText = d.bal.toFixed(4);
+                    document.getElementById('main-pnl').innerText = d.pnl.toFixed(4);
+                    document.getElementById('trade-bal').innerText = d.bal.toFixed(2);
+                    document.getElementById('side-usd').innerText = d.usd.toLocaleString(undefined, {minimumFractionDigits:2});
+                    document.getElementById('wd-max').innerText = d.bal.toFixed(4);
+                    this.updateChart(d.bal);
                 }, 1000);
             },
 
-            drawChart() {
-                const ctx = document.getElementById('chart-cvs').getContext('2d');
-                const cvs = ctx.canvas;
-                cvs.width = cvs.clientWidth; cvs.height = cvs.clientHeight;
-                
-                // Get fractal data
-                const data = Engine.getChartData();
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                
-                ctx.clearRect(0,0,cvs.width,cvs.height);
-                
-                // Gradient
-                const grad = ctx.createLinearGradient(0,0,0,cvs.height);
-                grad.addColorStop(0, 'rgba(20, 241, 149, 0.2)');
-                grad.addColorStop(1, 'rgba(20, 241, 149, 0)');
-                
-                ctx.beginPath();
-                data.forEach((v, i) => {
-                    const x = (i / (data.length-1)) * cvs.width;
-                    const y = cvs.height - ((v - min) / (max - min || 1)) * (cvs.height - 20) - 10;
-                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                });
-                
-                ctx.strokeStyle = '#14F195'; ctx.lineWidth = 2; ctx.stroke();
-                ctx.lineTo(cvs.width, cvs.height); ctx.lineTo(0, cvs.height);
-                ctx.fillStyle = grad; ctx.fill();
-            },
-
-            addLog() {
-                const box = document.getElementById('tx-log');
-                const type = Math.random() > 0.5 ? 'BUY' : 'SELL';
-                const pair = ['SOL/USDC', 'BONK/SOL', 'WIF/SOL', 'JUP/SOL'][Math.floor(Math.random()*4)];
-                const amt = (Math.random() * 10).toFixed(2);
-                
-                const div = document.createElement('div');
-                div.className = 'ob-row';
-                div.innerHTML = `
-                    <span class="${type==='BUY'?'ob-buy':'ob-sell'}">${type}</span>
-                    <span>${pair}</span>
-                    <span>${amt}</span>
-                    <span style="color:#666">${new Date().toLocaleTimeString().split(' ')[0]}</span>
-                `;
-                box.prepend(div);
-                if(box.children.length > 8) box.lastChild.remove();
-            },
-
-            genHistory() {
-                const box = document.getElementById('hist-body');
-                for(let i=0; i<10; i++) {
-                    const tr = document.createElement('tr');
-                    tr.style.borderBottom = "1px solid #222";
-                    tr.innerHTML = `
-                        <td style="padding:10px; color:#666;">#${Math.floor(Math.random()*9000)+1000}</td>
-                        <td style="color:#14F195">ARBITRAGE</td>
-                        <td>SOL</td>
-                        <td>+${(Math.random()*0.5).toFixed(4)}</td>
-                    `;
-                    box.appendChild(tr);
-                }
-            },
-
-            // Navigation Logic
-            nav(pageId, btn) {
-                // Remove active class from all pages and buttons
-                document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-                document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-                
-                // Add active to selected
-                document.getElementById('p-'+pageId).classList.add('active');
-                btn.classList.add('active');
-            },
-
-            // Modals
-            showDocs() { document.getElementById('modal-docs').classList.add('active'); },
-            showWithdraw() { 
-                document.getElementById('w-max').innerText = Engine.getData().bal.toFixed(4);
-                document.getElementById('modal-withdraw').classList.add('active'); 
-            },
-            closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); },
+            // --- WITHDRAWAL ---
+            openWithdraw() { document.getElementById('modal-withdraw').classList.remove('hidden'); },
+            closeModal(id) { document.getElementById(id).classList.add('hidden'); },
+            openDocs() { document.getElementById('modal-docs').classList.remove('hidden'); },
             
-            doWithdraw() {
-                this.closeModal();
-                const load = document.getElementById('modal-loading');
-                const txt = document.getElementById('load-text');
-                load.classList.add('active');
+            submitWithdraw() {
+                this.closeModal('modal-withdraw');
+                document.getElementById('modal-loader').classList.remove('hidden');
                 
-                const steps = ["Connecting to Wallet...", "Verifying Liquidity...", "Risk Analysis...", "Checking Collateral..."];
+                const steps = ["Checking Wallet...", "Verifying Liquidity...", "Risk Analysis...", "Collateral Status..."];
                 let i = 0;
+                const txt = document.getElementById('load-text');
                 
                 const int = setInterval(() => {
                     if(i < steps.length) {
                         txt.innerText = steps[i];
+                        txt.style.color = "#fff";
                         i++;
                     } else {
                         clearInterval(int);
-                        load.classList.remove('active');
-                        document.getElementById('modal-error').classList.add('active');
+                        this.closeModal('modal-loader');
+                        document.getElementById('modal-error').classList.remove('hidden');
                     }
                 }, 1000);
             },
 
-            updateClock() {
-                document.getElementById('clock').innerText = new Date().toISOString().split('T')[1].split('.')[0] + " UTC";
+            // --- SIMULATION DATA ---
+            genWatchlist() {
+                const coins = [
+                    {s:'SOL', p:'148.52', c:'+2.4%'},
+                    {s:'JUP', p:'1.12', c:'+5.1%'},
+                    {s:'BONK', p:'0.000024', c:'-1.2%'},
+                    {s:'WIF', p:'2.84', c:'+8.4%'}
+                ];
+                const c = document.getElementById('watchlist-container');
+                coins.forEach(coin => {
+                    c.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.85rem;">
+                        <span style="font-weight:600">${coin.s}</span>
+                        <div class="text-right">
+                            <div>$${coin.p}</div>
+                            <div class="${coin.c.includes('+')?'text-green':'text-red'}" style="font-size:0.75rem">${coin.c}</div>
+                        </div>
+                    </div>`;
+                });
+            },
+
+            genDiscovery() {
+                const c = document.getElementById('discovery-body');
+                const rows = [
+                    {t:'PEPE/SOL', p:'0.0004', a:'2m', v:'$1.2M', l:'+420%'},
+                    {t:'AI/SOL', p:'0.021', a:'14m', v:'$840K', l:'+12%'},
+                    {t:'DOGE/SOL', p:'0.14', a:'1h', v:'$4.1M', l:'-4%'}
+                ];
+                rows.forEach(r => {
+                    c.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600; color:#fff">${r.t}</td>
+                        <td class="text-mono">$${r.p}</td>
+                        <td class="text-muted">${r.a}</td>
+                        <td>${r.v}</td>
+                        <td class="${r.l.includes('+')?'text-green':'text-red'}">${r.l}</td>
+                        <td><button class="btn btn-primary btn-sm">SNIPE</button></td>
+                    </tr>`;
+                });
+            },
+
+            startIntel() {
+                const msgs = [
+                    {t:"Whale Buy: 400 SOL on $WIF", i:"🐳"},
+                    {t:"New Pool: $RETARD added to Raydium", i:"⚡"},
+                    {t:"Smart Money: 8x...99 just entered $JUP", i:"🧠"},
+                    {t:"Alert: Volume Spike on $BONK", i:"📊"}
+                ];
+                const c = document.getElementById('intel-container');
+                
+                setInterval(() => {
+                    const m = msgs[Math.floor(Math.random()*msgs.length)];
+                    const div = document.createElement('div');
+                    div.className = 'feed-item';
+                    div.innerHTML = `<div class="feed-icon">${m.i}</div><div><div style="font-weight:600; margin-bottom:2px;">${m.t}</div><div style="font-size:0.7rem; color:var(--text-muted)">Just now</div></div>`;
+                    c.prepend(div);
+                    if(c.children.length > 8) c.lastChild.remove();
+                }, 3500);
+            },
+
+            // --- CHART ---
+            chartData: [],
+            initChart() {
+                const cvs = document.getElementById('chart-canvas');
+                const ctx = cvs.getContext('2d');
+                cvs.width = cvs.clientWidth * 2;
+                cvs.height = cvs.clientHeight * 2;
+                // Pre-fill
+                let v = Logic.BASE;
+                for(let i=0; i<50; i++) this.chartData.push(v + Math.random()*0.1);
+            },
+            updateChart(val) {
+                this.chartData.push(val);
+                if(this.chartData.length > 50) this.chartData.shift();
+                
+                const cvs = document.getElementById('chart-canvas');
+                const ctx = cvs.getContext('2d');
+                const w = cvs.width; const h = cvs.height;
+                
+                ctx.clearRect(0,0,w,h);
+                const min = Math.min(...this.chartData);
+                const max = Math.max(...this.chartData);
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#14F195';
+                ctx.lineWidth = 4;
+                
+                this.chartData.forEach((d, i) => {
+                    const x = (i / 49) * w;
+                    const y = h - ((d - min) / (max - min || 1)) * (h - 40) - 20;
+                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                });
+                ctx.stroke();
+                
+                // Gradient Fill
+                ctx.lineTo(w, h); ctx.lineTo(0, h);
+                const g = ctx.createLinearGradient(0,0,0,h);
+                g.addColorStop(0, "rgba(20,241,149,0.2)");
+                g.addColorStop(1, "rgba(20,241,149,0)");
+                ctx.fillStyle = g;
+                ctx.fill();
             }
         };
 
-        Sys.init();
+        window.onload = () => App.init();
+        
+        // Spin Animation CSS
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
