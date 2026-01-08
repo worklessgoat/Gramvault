@@ -3,668 +3,584 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SOLANA | Institutional Terminal V2</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>GRAMVAULT | Institutional Solana Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --sol-purple: #9945FF;
             --sol-green: #14F195;
-            --sol-dark: #000000;
-            --sol-card: rgba(12, 12, 12, 0.6);
+            --sol-dark: #080808;
+            --sol-panel: rgba(20, 20, 20, 0.6);
             --sol-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #FFFFFF;
-            --text-secondary: #9BA1A6;
-            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+            --text-main: #FFFFFF;
+            --text-muted: #888;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
         body {
-            background-color: #050505;
-            font-family: 'Inter', sans-serif;
-            color: var(--text-primary);
+            background-color: var(--sol-dark);
+            font-family: 'Manrope', sans-serif;
+            color: var(--text-main);
             overflow-x: hidden;
             min-height: 100vh;
         }
 
-        /* --- BACKGROUND NETWORK ANIMATION --- */
-        #network-canvas {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            opacity: 0.6;
-        }
-
-        /* Vignette & Scanlines */
-        .overlay-fx {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
-            background: radial-gradient(circle at center, transparent 0%, #000 120%);
-        }
-        .scanlines {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-            background-size: 100% 4px;
-            opacity: 0.6;
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes borderPulse { 0% { border-color: rgba(20, 241, 149, 0.1); } 50% { border-color: rgba(20, 241, 149, 0.5); } 100% { border-color: rgba(20, 241, 149, 0.1); } }
-        @keyframes flashRed { 0% { color: inherit; } 50% { color: #ff4b4b; text-shadow: 0 0 10px rgba(255, 75, 75, 0.5); } 100% { color: inherit; } }
-        @keyframes flashGreen { 0% { color: inherit; } 50% { color: #14F195; text-shadow: 0 0 10px rgba(20, 241, 149, 0.5); } 100% { color: inherit; } }
-
-        /* --- UI COMPONENTS --- */
-        .btn-primary {
-            width: 100%;
-            padding: 16px;
-            border-radius: 8px;
-            border: none;
-            background: linear-gradient(90deg, var(--sol-purple), var(--sol-green));
-            color: #000;
-            font-weight: 800;
-            font-family: 'JetBrains Mono', monospace;
-            cursor: pointer;
-            transition: all 0.3s var(--ease);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(20, 241, 149, 0.4); }
-        .btn-primary::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-            transform: rotate(45deg) translateY(-100%); transition: 0.5s;
-        }
-        .btn-primary:hover::after { transform: rotate(45deg) translateY(100%); }
-
-        /* Auth Screen */
-        .auth-screen {
-            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100;
-            backdrop-filter: blur(10px); background: rgba(0,0,0,0.7);
-        }
-        .auth-box {
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(40px);
-            border: 1px solid var(--sol-border);
-            border-top: 1px solid rgba(153, 69, 255, 0.5);
-            padding: 50px;
-            width: 100%; max-width: 440px;
-            border-radius: 24px;
-            box-shadow: 0 0 100px rgba(153, 69, 255, 0.1);
-            animation: fadeInUp 0.8s var(--ease);
+        /* --- BACKGROUND FX --- */
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
         }
         
-        .form-input {
-            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--sol-border);
-            padding: 18px; border-radius: 12px; color: white; margin-bottom: 20px;
-            font-family: 'Inter', sans-serif; transition: 0.3s;
-        }
-        .form-input:focus { outline: none; border-color: var(--sol-green); background: rgba(20, 241, 149, 0.05); }
-
-        /* Dashboard */
-        .dashboard {
-            max-width: 1400px; margin: 0 auto; padding: 20px;
-            display: grid; grid-template-rows: auto 1fr; height: 100vh;
-            animation: fadeInUp 1s var(--ease) 0.3s backwards;
+        #particle-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            opacity: 0.4;
         }
 
-        .header {
-            display: flex; justify-content: space-between; align-items: center; padding: 20px 30px;
-            background: rgba(20, 20, 20, 0.5); backdrop-filter: blur(20px);
-            border-radius: 16px; border: 1px solid var(--sol-border); margin-bottom: 30px;
-        }
-
-        .logo-text {
-            font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;
-            background: linear-gradient(135deg, #fff 30%, #9945FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            display: flex; align-items: center; gap: 10px;
-        }
-
-        .grid { display: grid; gap: 24px; grid-template-columns: repeat(12, 1fr); }
-        .col-8 { grid-column: span 8; } .col-4 { grid-column: span 4; } .col-3 { grid-column: span 3; } .col-12 { grid-column: span 12; }
-
-        .card {
-            background: var(--sol-card); backdrop-filter: blur(30px);
-            border: 1px solid var(--sol-border); border-radius: 16px; padding: 30px;
-            position: relative; overflow: hidden; transition: transform 0.4s var(--ease), border-color 0.4s;
-        }
-        .card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--sol-green), transparent);
-            opacity: 0.5;
-        }
-
-        .balance-display {
-            font-family: 'JetBrains Mono', monospace; font-size: 3.5rem; font-weight: 700;
-            background: linear-gradient(180deg, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: -2px; margin: 10px 0;
-            transition: color 0.2s;
-        }
-
-        .pill {
-            padding: 6px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-            display: inline-flex; align-items: center; gap: 6px;
-        }
-        .pill-green { background: rgba(20, 241, 149, 0.1); color: var(--sol-green); border: 1px solid rgba(20, 241, 149, 0.2); }
-        .pill-red { background: rgba(255, 75, 75, 0.1); color: #ff4b4b; border: 1px solid rgba(255, 75, 75, 0.2); }
-
-        /* Chart Canvas */
-        canvas { width: 100%; height: 320px; filter: drop-shadow(0 0 20px rgba(20, 241, 149, 0.2)); }
-
-        /* Modals */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);
-        }
-        .modal.active { display: flex; animation: fadeInUp 0.4s var(--ease); }
-        .modal-content {
-            background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 480px; padding: 40px; border-radius: 20px;
+        /* --- SHARED UI --- */
+        .btn-grad {
+            background: linear-gradient(135deg, var(--sol-purple), var(--sol-green));
+            border: none; padding: 1px; border-radius: 8px; cursor: pointer;
+            transition: transform 0.2s var(--ease);
             position: relative; overflow: hidden;
         }
-        .modal-content::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, var(--sol-purple), var(--sol-green));
-            animation: borderPulse 2s infinite;
+        .btn-grad-inner {
+            background: #000; border-radius: 7px; padding: 12px 24px;
+            color: white; font-weight: 700; font-family: 'Manrope', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.3s;
+        }
+        .btn-grad:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(153, 69, 255, 0.4); }
+        .btn-grad:hover .btn-grad-inner { background: transparent; color: #000; }
+
+        .logo {
+            display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.5px; font-size: 1.25rem;
         }
 
-        /* Activity List */
-        .tx-row {
-            display: flex; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: 0.2s;
+        /* --- LANDING PAGE --- */
+        #landing-page { position: relative; z-index: 10; padding-bottom: 100px; }
+        
+        .nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 40px; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50;
+            border-bottom: 1px solid var(--sol-border);
         }
-        .tx-row:hover { background: rgba(255,255,255,0.02); padding-left: 10px; padding-right: 10px; border-radius: 8px; border-bottom-color: transparent; }
 
-        @media (max-width: 900px) { .col-8, .col-4 { grid-column: span 12; } }
-        @media (max-width: 600px) {
-            .balance-display { font-size: 2.5rem; }
-            .col-3 { grid-column: span 6; }
-            .header { flex-direction: column; gap: 15px; }
-            .header-info { display: none; }
+        .hero {
+            text-align: center; padding: 120px 20px;
+            background: radial-gradient(circle at 50% 30%, rgba(153,69,255,0.15), transparent 60%);
         }
+
+        .hero h1 {
+            font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 24px;
+            background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 40px auto; }
+
+        .specs-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;
+            max-width: 1200px; margin: 0 auto; padding: 0 20px;
+        }
+
+        .spec-card {
+            background: var(--sol-panel); border: 1px solid var(--sol-border);
+            padding: 32px; border-radius: 16px; transition: 0.3s;
+        }
+        .spec-card:hover { border-color: var(--sol-green); transform: translateY(-5px); }
+        .spec-icon { font-size: 2rem; margin-bottom: 16px; }
+        .spec-title { font-weight: 700; margin-bottom: 8px; color: white; }
+        .spec-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+        /* --- LOADING SCREEN --- */
+        #loader {
+            position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: none; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .loader-bar-bg { width: 300px; height: 2px; background: #222; margin-top: 20px; border-radius: 2px; }
+        .loader-bar-fill { width: 0%; height: 100%; background: var(--sol-green); box-shadow: 0 0 10px var(--sol-green); transition: width 0.1s linear; }
+        .loader-text { font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--sol-green); margin-top: 10px; }
+
+        /* --- DASHBOARD (Hidden initially) --- */
+        #app-container { display: none; height: 100vh; overflow: hidden; position: relative; }
+        
+        .dashboard-layout {
+            display: grid; grid-template-columns: 260px 1fr; height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(10,10,10,0.9); border-right: 1px solid var(--sol-border);
+            padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        
+        .menu-item {
+            padding: 12px; color: var(--text-muted); cursor: pointer; border-radius: 8px; margin-bottom: 4px; font-weight: 600; display: flex; align-items: center; gap: 10px;
+        }
+        .menu-item.active { background: rgba(255,255,255,0.05); color: white; }
+        .menu-item:hover { color: white; }
+
+        .main-content { padding: 32px; overflow-y: auto; }
+        
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px; }
+        
+        .stat-card {
+            background: var(--sol-panel); border: 1px solid var(--sol-border);
+            padding: 24px; border-radius: 12px; position: relative; overflow: hidden;
+        }
+        
+        .balance-hero {
+            grid-column: span 2; background: linear-gradient(160deg, rgba(20,20,20,0.8), rgba(20, 241, 149, 0.05));
+        }
+
+        .live-indicator {
+            width: 8px; height: 8px; background: var(--sol-green); border-radius: 50%;
+            box-shadow: 0 0 10px var(--sol-green); animation: pulse 2s infinite; display: inline-block; margin-right: 6px;
+        }
+
+        .big-number { font-family: 'JetBrains Mono'; font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; margin: 10px 0; }
+        .pnl { font-family: 'JetBrains Mono'; font-size: 1rem; font-weight: 600; }
+        .green { color: var(--sol-green); }
+        .red { color: #ff4b4b; }
+
+        /* Chart */
+        .chart-container {
+            background: var(--sol-panel); border: 1px solid var(--sol-border); border-radius: 12px; padding: 24px; height: 400px; margin-bottom: 24px;
+        }
+        canvas { width: 100%; height: 100%; }
+
+        /* --- AUTH MODAL --- */
+        #auth-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+        }
+        .auth-box {
+            background: #0a0a0a; border: 1px solid var(--sol-border); padding: 40px; border-radius: 16px;
+            width: 400px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.5); border-top: 1px solid var(--sol-purple);
+        }
+        .input-field {
+            width: 100%; background: #111; border: 1px solid #333; color: white; padding: 14px;
+            border-radius: 8px; margin-bottom: 16px; font-family: 'Manrope'; outline: none; transition: 0.3s;
+        }
+        .input-field:focus { border-color: var(--sol-green); background: #161616; }
+
+        /* --- MODALS --- */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .modal.active { display: flex; }
+        .modal-card {
+            background: #111; border: 1px solid #333; width: 450px; padding: 30px; border-radius: 16px;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        @media(max-width: 900px) { .dashboard-layout { grid-template-columns: 1fr; } .sidebar { display: none; } .stats-row { grid-template-columns: 1fr; } .balance-hero { grid-column: span 1; } .hero h1 { font-size: 2.5rem; } }
     </style>
 </head>
 <body>
 
-    <canvas id="network-canvas"></canvas>
-    <div class="overlay-fx"></div>
-    <div class="scanlines"></div>
+    <div class="bg-grid"></div>
+    <canvas id="particle-canvas"></canvas>
 
-    <div id="auth-screen" class="auth-screen">
-        <div class="auth-box">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <svg width="60" height="60" viewBox="0 0 397 311" fill="none" style="filter: drop-shadow(0 0 20px rgba(20,241,149,0.5)); margin-bottom: 15px;">
-                    <path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#paint0_linear)"/>
-                    <defs><linearGradient id="paint0_linear" x1="396.9" y1="25" x2="0" y2="310.8" gradientUnits="userSpaceOnUse"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs>
-                </svg>
-                <h2 style="font-weight: 800; letter-spacing: 2px;">GRAMVAULT</h2>
-                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">INSTITUTIONAL ACCESS</p>
-            </div>
-            
-            <input type="text" id="u_field" class="form-input" placeholder="TERMINAL ID">
-            <input type="password" id="p_field" class="form-input" placeholder="ACCESS KEY">
-            <div id="err" style="height: 20px; color: #ff4b4b; font-size: 0.8rem; margin-bottom: 10px; text-align: center;"></div>
-            <button class="btn-primary" onclick="Engine.initAccess()">INITIALIZE LINK</button>
-        </div>
-    </div>
-
-    <div id="dashboard" class="dashboard" style="display: none;">
-        <header class="header">
-            <div class="logo-text">
-                <div style="width: 10px; height: 10px; background: var(--sol-green); border-radius: 50%; box-shadow: 0 0 10px var(--sol-green);"></div>
+    <div id="landing-page">
+        <nav class="nav">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#grad1)"/><defs><linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
                 GRAMVAULT
             </div>
-            <div style="display: flex; gap: 20px; align-items: center;">
-                <span class="header-info" style="font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--text-secondary);">ID: Groovy9944</span>
-                <span class="header-info" style="font-family: 'JetBrains Mono'; font-size: 0.8rem;" id="clock">00:00:00</span>
-                <button onclick="Engine.triggerWithdraw()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s;">WITHDRAW</button>
-            </div>
-        </header>
+            <button class="btn-grad" onclick="System.startLoad()">
+                <div class="btn-grad-inner">LAUNCH TERMINAL</div>
+            </button>
+        </nav>
 
-        <div class="grid">
-            <div class="card col-8">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div class="pill pill-green">● SOLANA MAINNET</div>
-                        <h1 class="balance-display" id="main-bal">47.0000</h1>
-                        <p style="color: var(--text-secondary); font-family: 'JetBrains Mono';">≈ $<span id="usd-value">6,815.00</span> USD</p>
+        <section class="hero">
+            <div style="display: inline-block; padding: 6px 12px; border: 1px solid var(--sol-border); border-radius: 20px; font-size: 0.8rem; margin-bottom: 20px; color: var(--sol-green);">● SYSTEMS OPERATIONAL</div>
+            <h1>Institutional Grade<br>Solana Execution</h1>
+            <p>Access high-frequency arbitrage strategies with sub-millisecond latency. Secured by Multi-MPC technology.</p>
+        </section>
+
+        <section class="specs-grid">
+            <div class="spec-card">
+                <div class="spec-icon">⚡</div>
+                <div class="spec-title">400ms Latency</div>
+                <div class="spec-desc">Direct connection to Jito validators ensures your transactions land in the next block, guaranteed.</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-icon">🛡️</div>
+                <div class="spec-title">MEV Protection</div>
+                <div class="spec-desc">Transactions are routed through private mempools to prevent sandwich attacks and front-running.</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-icon">📈</div>
+                <div class="spec-title">AI Volatility Engine</div>
+                <div class="spec-desc">Proprietary algorithms analyze on-chain liquidity depth to execute trades with minimal slippage.</div>
+            </div>
+        </section>
+    </div>
+
+    <div id="loader">
+        <svg width="60" height="60" viewBox="0 0 397 311" fill="none"><path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 102.7h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7C399.9 32.1 397 25 391.2 25H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 91.6c-4.1 4.1-1.2 11.1 4.6 11.1zM391.2 142.6H73.8c-3.5 0-6.8 1.4-9.2 3.8L1.9 209.1c-4.1 4.1-1.2 11.1 4.6 11.1h317.4c3.5 0 6.8-1.4 9.2-3.8l62.7-62.7c4.1-4.2 1.2-11.1-4.6-11.1z" fill="url(#grad2)"/><defs><linearGradient id="grad2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14F195"/><stop offset="1" stop-color="#9945FF"/></linearGradient></defs></svg>
+        <div class="loader-bar-bg"><div class="loader-bar-fill" id="loader-fill"></div></div>
+        <div class="loader-text" id="loader-msg">INITIALIZING HANDSHAKE...</div>
+    </div>
+
+    <div id="app-container">
+        
+        <div id="auth-overlay">
+            <div class="auth-box">
+                <h2 style="margin-bottom: 5px;">Verify Identity</h2>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Institutional Access Node</p>
+                <input type="text" id="u_in" class="input-field" placeholder="Terminal ID">
+                <input type="password" id="p_in" class="input-field" placeholder="Access Key">
+                <div id="login-err" style="color: #ff4b4b; font-size: 0.8rem; margin-bottom: 15px; height: 15px;"></div>
+                <button class="btn-grad" style="width: 100%" onclick="System.login()">
+                    <div class="btn-grad-inner">ESTABLISH UPLINK</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-layout">
+            <div class="sidebar">
+                <div>
+                    <div class="logo" style="margin-bottom: 40px; font-size: 1rem;">
+                        GRAMVAULT <span style="font-size: 0.6rem; color: var(--sol-green); border: 1px solid var(--sol-green); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">PRO</span>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; margin-bottom: 5px;">24H PNL</div>
-                        <div id="cycle-profit" style="font-size: 1.2rem; font-weight: 700; color: var(--sol-green); text-shadow: 0 0 20px rgba(20, 241, 149, 0.4);">+0.0000</div>
+                    <div class="menu-item active">📊 Dashboard</div>
+                    <div class="menu-item">⚡ Strategies</div>
+                    <div class="menu-item">⚙️ Settings</div>
+                </div>
+                <div style="font-size: 0.8rem; color: #444;">
+                    Node: Solana Mainnet-Beta<br>
+                    Ping: 14ms
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                    <h2 style="font-weight: 600;">Portfolio Overview</h2>
+                    <div style="display: flex; gap: 15px;">
+                        <div style="background: #111; padding: 8px 16px; border-radius: 8px; font-family: 'JetBrains Mono';" id="clock">00:00:00</div>
+                        <button class="btn-grad" onclick="System.openWithdraw()">
+                            <div class="btn-grad-inner" style="padding: 8px 20px; font-size: 0.85rem;">WITHDRAW</div>
+                        </button>
                     </div>
                 </div>
-                <div style="margin-top: 30px; position: relative;">
-                    <canvas id="live-graph"></canvas>
-                </div>
-            </div>
 
-            <div class="card col-4">
-                <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 25px;">Live Metrics</h3>
-                
-                <div style="display: grid; gap: 20px;">
-                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
-                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">VOLATILITY INDEX</div>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: #d4b3ff;" id="vol-index">LOW</div>
+                <div class="stats-row">
+                    <div class="stat-card balance-hero">
+                        <div style="color: var(--text-muted); font-size: 0.9rem;">Total Equity</div>
+                        <div class="big-number" id="disp-bal">0.0000 SOL</div>
+                        <div class="pnl green"><span class="live-indicator"></span><span id="disp-pnl">+0.0000</span> (24h)</div>
                     </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
-                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">SUCCESS RATE</div>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--sol-green);">98.4%</div>
+                    <div class="stat-card">
+                        <div style="color: var(--text-muted); font-size: 0.9rem;">Daily Target</div>
+                        <div class="big-number" style="font-size: 1.8rem;">2.40 SOL</div>
+                        <div class="pnl" style="color: #888;">Algorithmic Pace</div>
                     </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
-                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">RISK LEVEL</div>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--sol-purple);">INSTITUTIONAL</div>
+                    <div class="stat-card">
+                        <div style="color: var(--text-muted); font-size: 0.9rem;">Status</div>
+                        <div class="big-number" style="font-size: 1.8rem; color: var(--sol-green);">ACTIVE</div>
+                        <div class="pnl" style="color: #888;">Trading Engine</div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card col-3">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">TOTAL TRADES</div>
-                <div style="font-size: 1.5rem; font-weight: 700; margin-top: 10px;">1,248</div>
-            </div>
-            <div class="card col-3">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">NET APY</div>
-                <div style="font-size: 1.5rem; font-weight: 700; margin-top: 10px; color: var(--sol-green);">412%</div>
-            </div>
-            <div class="card col-3">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">VALIDATOR</div>
-                <div style="font-size: 1.5rem; font-weight: 700; margin-top: 10px;">JITO-SOL</div>
-            </div>
-            <div class="card col-3">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">GAS SAVED</div>
-                <div style="font-size: 1.5rem; font-weight: 700; margin-top: 10px;">4.2 SOL</div>
-            </div>
+                <div class="chart-container">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <h4>Performance Analytics</h4>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">LIVE TICKER</div>
+                    </div>
+                    <canvas id="chart-canvas"></canvas>
+                </div>
 
-            <div class="card col-12">
-                <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 20px;">On-Chain Execution Ledger</h3>
-                <div id="ledger-entries"></div>
+                <div class="stat-card">
+                    <h4 style="margin-bottom: 20px;">Execution Log</h4>
+                    <div id="tx-log" style="font-family: 'JetBrains Mono'; font-size: 0.85rem;"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="withdraw-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;">Withdraw Assets</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 25px;">Enter destination SPL wallet address. Only Mainnet Beta addresses are supported.</p>
-            <input type="text" id="wallet-address" class="form-input" placeholder="Wallet Address (e.g. 8x...)" style="font-family: 'JetBrains Mono';">
+        <div class="modal-card">
+            <h3 style="margin-bottom: 20px;">Withdraw Assets</h3>
+            <p style="color: #888; margin-bottom: 20px; font-size: 0.9rem;">Assets will be transferred via SPL standard. Irreversible once confirmed.</p>
+            <input type="text" id="w-addr" class="input-field" placeholder="Solana Wallet Address">
+            <input type="number" id="w-amt" class="input-field" placeholder="Amount (SOL)">
             <div style="display: flex; gap: 10px;">
-                <button class="btn-primary" onclick="Engine.proceedToAmount()" style="background: white; color: black;">Next Step</button>
-                <button class="btn-primary" onclick="Engine.closeModal()" style="background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2);">Cancel</button>
+                <button class="btn-grad" style="flex: 1" onclick="System.processWithdraw()">
+                    <div class="btn-grad-inner">CONFIRM</div>
+                </button>
+                <button class="btn-grad" style="flex: 1" onclick="System.closeModals()">
+                    <div class="btn-grad-inner" style="background: #222;">CANCEL</div>
+                </button>
             </div>
-        </div>
-    </div>
-
-    <div id="amount-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;">Quantity</h3>
-            <div style="background: rgba(20, 241, 149, 0.1); border: 1px solid rgba(20, 241, 149, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: var(--sol-green); font-family: 'JetBrains Mono';">
-                Available: <span id="available-balance">0.00</span> SOL
-            </div>
-            <input type="number" id="withdraw-amount" class="form-input" placeholder="0.00">
-            <input type="text" id="wallet-display" class="form-input" readonly style="opacity: 0.5; font-size: 0.8rem;">
-            <button class="btn-primary" onclick="Engine.confirmWithdrawal()">Confirm Transaction</button>
-        </div>
-    </div>
-
-    <div id="processing-modal" class="modal">
-        <div class="modal-content" style="text-align: center; padding: 60px 40px;">
-            <div style="width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--sol-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 30px auto;"></div>
-            <h3 style="margin-bottom: 10px;">Broadcasting to Blockchain</h3>
-            <p style="color: var(--text-secondary);">Validating Blockhash...</p>
-            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
         </div>
     </div>
 
     <div id="error-modal" class="modal">
-        <div class="modal-content" style="border-top-color: #ff4b4b;">
-            <div style="color: #ff4b4b; font-size: 3rem; margin-bottom: 10px;">⚠</div>
-            <h3 style="font-size: 1.5rem; color: #ff4b4b; margin-bottom: 20px;">Protocol Rejected</h3>
-            <div style="background: rgba(255, 75, 75, 0.1); padding: 15px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; border-left: 3px solid #ff4b4b; margin-bottom: 25px;">
-                <strong>Error Code: 0x4B3 - Insufficient Liquidity Collateral</strong><br>
-                Your withdrawal request was flagged by the automated risk engine.
+        <div class="modal-card" style="border-top: 2px solid #ff4b4b;">
+            <h3 style="color: #ff4b4b; margin-bottom: 10px;">Transaction Failed</h3>
+            <div style="background: rgba(255, 75, 75, 0.1); color: #ff4b4b; padding: 10px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size: 0.8rem; margin-bottom: 20px;">
+                Error Code: 0x4B3 - Liquidity Threshold
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px;">
-                To ensure solvency during high-frequency trading, this vault requires a minimum liquidity buffer.
+            <p style="color: #ccc; font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;">
+                The Smart Vault contract requires a minimum collateral buffer to execute withdrawals during high-volatility periods. 
                 <br><br>
-                <strong>Required Action:</strong> Increase account balance by <span style="color: white; font-weight: 700;">12.50 SOL</span> to unlock withdrawals.
+                <strong>Required:</strong> Please add <strong>12.50 SOL</strong> to your balance to unlock full withdrawal capabilities.
             </p>
-            <button class="btn-primary" onclick="Engine.closeModal()" style="background: #222; color: white;">Acknowledge</button>
+            <button class="btn-grad" style="width: 100%" onclick="System.closeModals()">
+                <div class="btn-grad-inner">ACKNOWLEDGE</div>
+            </button>
         </div>
     </div>
 
     <script>
-        // --- 1. THE VISUAL ENGINE (Background & Effects) ---
-        const VisEngine = {
-            init() {
-                this.canvas = document.getElementById('network-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.resize();
-                this.nodes = [];
-                this.mouseX = 0;
-                this.mouseY = 0;
-                
-                // Create Nodes
-                for(let i=0; i<60; i++) this.nodes.push(new Node(this.canvas.width, this.canvas.height));
-                
-                window.addEventListener('resize', () => this.resize());
-                window.addEventListener('mousemove', (e) => {
-                    this.mouseX = e.clientX;
-                    this.mouseY = e.clientY;
-                });
-                
-                this.animate();
-            },
+        // --- MATHEMATICAL CORE (THE PERSISTENT ENGINE) ---
+        const MathCore = {
+            // CONSTANTS
+            // Jan 1, 2024 00:00:00 UTC - The "Big Bang" of the simulation
+            // Using a fixed past date ensures calculation is identical on every device/browser
+            START_TIMESTAMP: 1704067200000, 
+            BASE_BALANCE: 47.00,
+            TARGET_DAILY: 2.40, // Exact target per day
             
-            resize() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-            },
-            
-            animate() {
-                this.ctx.clearRect(0,0, this.canvas.width, this.canvas.height);
-                
-                // Draw Connections
-                this.ctx.strokeStyle = 'rgba(153, 69, 255, 0.15)';
-                this.ctx.lineWidth = 1;
-                
-                for(let i=0; i<this.nodes.length; i++) {
-                    let node = this.nodes[i];
-                    node.update();
-                    node.draw(this.ctx);
-                    
-                    // Connect to mouse
-                    let distM = Math.hypot(node.x - this.mouseX, node.y - this.mouseY);
-                    if(distM < 150) {
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(node.x, node.y);
-                        this.ctx.lineTo(this.mouseX, this.mouseY);
-                        this.ctx.stroke();
-                    }
+            getData() {
+                const now = Date.now();
+                const msElapsed = now - this.START_TIMESTAMP;
+                const secondsElapsed = msElapsed / 1000;
+                const daysElapsed = secondsElapsed / 86400;
 
-                    // Connect to neighbors
-                    for(let j=i; j<this.nodes.length; j++) {
-                        let dist = Math.hypot(node.x - this.nodes[j].x, node.y - this.nodes[j].y);
-                        if(dist < 100) {
-                            this.ctx.beginPath();
-                            this.ctx.moveTo(node.x, node.y);
-                            this.ctx.lineTo(this.nodes[j].x, this.nodes[j].y);
-                            this.ctx.stroke();
-                        }
-                    }
-                }
-                requestAnimationFrame(() => this.animate());
+                // 1. Calculate Linear Growth (The "Trend")
+                // 2.4 SOL per day = 0.1 SOL per hour = 0.00166 per minute
+                const linearProfit = daysElapsed * this.TARGET_DAILY;
+
+                // 2. Add "Noise" (Volatility)
+                // Use sine waves based on time so it's deterministic (same output for same time)
+                // This makes it look like it's trading (up and down) but sticking to the trend
+                const noise1 = Math.sin(secondsElapsed / 400) * 0.05; // Slow wave
+                const noise2 = Math.cos(secondsElapsed / 50) * 0.02;  // Fast wave
+                
+                // 3. Current Trade Simulation (Is it up or down right this second?)
+                const tick = Math.sin(secondsElapsed); 
+
+                const totalProfit = linearProfit + noise1 + noise2;
+                const currentBalance = this.BASE_BALANCE + totalProfit;
+
+                return {
+                    balance: currentBalance,
+                    profit: totalProfit,
+                    tick: tick // Positive or negative determines red/green flash
+                };
             }
         };
 
-        class Node {
-            constructor(w, h) {
-                this.w = w; this.h = h;
-                this.x = Math.random() * w;
-                this.y = Math.random() * h;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 2 + 1;
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if(this.x < 0 || this.x > this.w) this.vx *= -1;
-                if(this.y < 0 || this.y > this.h) this.vy *= -1;
-            }
-            draw(ctx) {
-                ctx.fillStyle = '#14F195';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-                ctx.fill();
-            }
-        }
-
-        // --- 2. THE LOGIC ENGINE (Volatility & Data) ---
-        const Engine = {
-            config: {
-                startBal: 47.00,
-                // VOLATILITY LOGIC: 
-                // We add a random number between -0.002 and +0.003 every tick.
-                // The slight positive skew ensures it profits "end of day" but fluctuates down often.
-                volatility: 0.006, 
-                skew: 0.0008 
+        // --- SYSTEM CONTROLLER ---
+        const System = {
+            chartData: [],
+            
+            init() {
+                this.renderBackground();
+                // Pre-fill chart with deterministic history
+                let time = Date.now() / 1000 - 3600; // start 1 hour ago
+                for(let i=0; i<60; i++) {
+                    // Quick simulation logic for chart history
+                    time += 60;
+                    const days = (time * 1000 - MathCore.START_TIMESTAMP) / (1000*86400);
+                    const val = MathCore.BASE_BALANCE + (days * MathCore.TARGET_DAILY) + (Math.sin(time/400)*0.05);
+                    this.chartData.push(val);
+                }
             },
 
-            state: {
-                active: false,
-                currentBal: 47.00,
-                startProfit: 0,
-                chartData: [],
-                lastUpdate: 0
+            startLoad() {
+                document.getElementById('landing-page').style.display = 'none';
+                document.getElementById('loader').style.display = 'flex';
+                
+                const bar = document.getElementById('loader-fill');
+                const txt = document.getElementById('loader-msg');
+                let width = 0;
+                
+                const interval = setInterval(() => {
+                    width += Math.random() * 5;
+                    if(width > 100) width = 100;
+                    bar.style.width = width + '%';
+
+                    if(width < 30) txt.innerText = "CONNECTING TO SOLANA MAINNET...";
+                    else if(width < 60) txt.innerText = "SYNCING RPC NODES [JITO-SOL]...";
+                    else if(width < 90) txt.innerText = "VERIFYING ENCRYPTION KEYS...";
+                    else txt.innerText = "ESTABLISHING SECURE SESSION...";
+
+                    if(width === 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            document.getElementById('loader').style.display = 'none';
+                            document.getElementById('app-container').style.display = 'block';
+                            document.getElementById('auth-overlay').style.display = 'flex';
+                        }, 500);
+                    }
+                }, 100); // ~3-4 seconds total
             },
 
-            initAccess() {
-                const u = document.getElementById('u_field').value;
-                const p = document.getElementById('p_field').value;
+            login() {
+                const u = document.getElementById('u_in').value;
+                const p = document.getElementById('p_in').value;
 
                 if(u === "Groovy9944" && p === "user39zxnlojp") {
-                    const btn = document.querySelector('.btn-primary');
-                    btn.innerHTML = "AUTHENTICATING...";
-                    btn.style.background = "#fff";
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    this.startLiveFeed();
+                } else {
+                    document.getElementById('login-err').innerText = "INVALID CREDENTIALS // ACCESS DENIED";
+                }
+            },
+
+            startLiveFeed() {
+                setInterval(() => {
+                    const data = MathCore.getData();
                     
-                    setTimeout(() => {
-                        document.getElementById('auth-screen').style.transition = 'opacity 0.5s';
-                        document.getElementById('auth-screen').style.opacity = '0';
-                        setTimeout(() => {
-                            document.getElementById('auth-screen').style.display = 'none';
-                            document.getElementById('dashboard').style.display = 'grid';
-                            this.bootSequence();
-                        }, 500);
-                    }, 1500);
-                } else {
-                    const err = document.getElementById('err');
-                    err.innerText = "ACCESS DENIED // INVALID CREDENTIALS";
-                    document.querySelector('.auth-box').style.animation = 'none';
-                    document.querySelector('.auth-box').offsetHeight; /* trigger reflow */
-                    document.querySelector('.auth-box').style.animation = 'shake 0.4s';
-                    // Add shake keyframe dynamically
-                    const style = document.createElement('style');
-                    style.innerHTML = `@keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }`;
-                    document.head.appendChild(style);
-                }
+                    // UI Updates
+                    const balEl = document.getElementById('disp-bal');
+                    balEl.innerText = data.balance.toFixed(4) + " SOL";
+                    balEl.style.color = data.tick > 0 ? "#fff" : "#ffcccc"; // Subtle flash
+                    
+                    document.getElementById('disp-pnl').innerText = "+" + (data.profit % 2.4).toFixed(4); // Show "Daily" progress
+                    
+                    // Clock
+                    const d = new Date();
+                    document.getElementById('clock').innerText = d.toLocaleTimeString('en-US', {hour12: false});
+
+                    // Chart Update
+                    this.chartData.push(data.balance);
+                    if(this.chartData.length > 60) this.chartData.shift();
+                    this.drawChart();
+
+                    // Generate Trade Log occasionally
+                    if(Math.random() > 0.7) this.addLogEntry(data.tick > 0);
+
+                }, 1000);
             },
 
-            bootSequence() {
-                this.state.active = true;
-                this.initGraph();
-                this.generateTransactions();
-                // Start the volatility loop
-                this.loop();
-                // Clock
-                setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
-            },
-
-            loop() {
-                if(!this.state.active) return;
-
-                // 1. Calculate Volatility (Random Walk)
-                const randomFlux = (Math.random() - 0.5) * this.config.volatility;
-                const change = randomFlux + this.config.skew; // Add positive drift
+            addLogEntry(isBuy) {
+                const log = document.getElementById('tx-log');
+                const pair = ['SOL-USDC', 'JUP-SOL', 'BONK-SOL'][Math.floor(Math.random()*3)];
+                const amt = (Math.random() * 2).toFixed(2);
+                const time = new Date().toLocaleTimeString().split(' ')[0];
                 
-                this.state.currentBal += change;
-                const totalProfit = this.state.currentBal - this.config.startBal;
-
-                // 2. Update UI
-                const balEl = document.getElementById('main-bal');
-                const profitEl = document.getElementById('cycle-profit');
+                const div = document.createElement('div');
+                div.style.marginBottom = "8px";
+                div.style.display = "flex";
+                div.style.justifyContent = "space-between";
+                div.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                div.style.paddingBottom = "4px";
                 
-                balEl.innerText = this.state.currentBal.toFixed(4);
-                profitEl.innerText = (totalProfit > 0 ? '+' : '') + totalProfit.toFixed(4);
+                div.innerHTML = `
+                    <span><span style="color:${isBuy ? 'var(--sol-green)' : '#ff4b4b'}">${isBuy ? 'BUY' : 'SELL'}</span> ${pair}</span>
+                    <span>${amt} SOL <span style="color:#666; font-size:0.7rem">${time}</span></span>
+                `;
                 
-                document.getElementById('usd-value').innerText = (this.state.currentBal * 145.2).toLocaleString('en-US', {minimumFractionDigits: 2});
-
-                // Color Flashing based on movement
-                if(change < 0) {
-                    balEl.style.animation = 'flashRed 0.5s';
-                    profitEl.style.color = '#ff4b4b';
-                } else {
-                    balEl.style.animation = 'flashGreen 0.5s';
-                    profitEl.style.color = '#14F195';
-                }
-                
-                // Reset animation
-                setTimeout(() => balEl.style.animation = 'none', 500);
-
-                // 3. Update Chart
-                this.state.chartData.push(this.state.currentBal);
-                if(this.state.chartData.length > 50) this.state.chartData.shift();
-                this.drawChart();
-
-                // Random interval between 500ms and 2000ms for realism
-                setTimeout(() => this.loop(), Math.random() * 1500 + 500);
-            },
-
-            initGraph() {
-                // Pre-fill chart with simulated historical data
-                let tempBal = this.config.startBal;
-                for(let i=0; i<50; i++) {
-                    tempBal += (Math.random() - 0.5) * 0.05 + 0.001;
-                    this.state.chartData.push(tempBal);
-                }
+                log.prepend(div);
+                if(log.children.length > 6) log.lastChild.remove();
             },
 
             drawChart() {
-                const canvas = document.getElementById('live-graph');
-                const ctx = canvas.getContext('2d');
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width * 2; // Retina sharpness
-                canvas.height = rect.height * 2;
-                ctx.scale(2, 2);
-
-                const width = rect.width;
-                const height = rect.height;
-                const data = this.state.chartData;
+                const ctx = document.getElementById('chart-canvas').getContext('2d');
+                const w = ctx.canvas.width = ctx.canvas.clientWidth;
+                const h = ctx.canvas.height = ctx.canvas.clientHeight;
                 
-                // Min/Max for scaling
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const range = max - min;
+                const vals = this.chartData;
+                const min = Math.min(...vals);
+                const max = Math.max(...vals);
+                const range = max - min || 1;
 
-                ctx.clearRect(0,0,width,height);
+                ctx.clearRect(0,0,w,h);
+                
+                // Gradient
+                const grad = ctx.createLinearGradient(0,0,0,h);
+                grad.addColorStop(0, 'rgba(20, 241, 149, 0.2)');
+                grad.addColorStop(1, 'rgba(20, 241, 149, 0)');
 
-                // Gradient Fill
-                const gradient = ctx.createLinearGradient(0, 0, 0, height);
-                gradient.addColorStop(0, 'rgba(20, 241, 149, 0.2)');
-                gradient.addColorStop(1, 'rgba(20, 241, 149, 0)');
-
-                // Draw Smooth Line (Bezier Curve)
                 ctx.beginPath();
                 ctx.strokeStyle = '#14F195';
-                ctx.lineWidth = 3;
-                
-                // Move to first point
-                let x0 = 0;
-                let y0 = height - ((data[0] - min) / range) * (height - 40) - 20;
-                ctx.moveTo(x0, y0);
+                ctx.lineWidth = 2;
 
-                // Curve through points
-                for(let i=1; i<data.length; i++) {
-                    const x = (i / (data.length - 1)) * width;
-                    const y = height - ((data[i] - min) / range) * (height - 40) - 20;
-                    
-                    // Bezier control points for smoothing
-                    const prevX = ((i-1) / (data.length - 1)) * width;
-                    const prevY = height - ((data[i-1] - min) / range) * (height - 40) - 20;
-                    const cp1x = prevX + (x - prevX) / 2;
-                    const cp1y = prevY;
-                    const cp2x = prevX + (x - prevX) / 2;
-                    const cp2y = y;
-                    
-                    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-                }
-                
-                ctx.stroke();
-                
-                // Fill under line
-                ctx.lineTo(width, height);
-                ctx.lineTo(0, height);
-                ctx.fillStyle = gradient;
-                ctx.fill();
+                vals.forEach((v, i) => {
+                    const x = (i / (vals.length-1)) * w;
+                    const y = h - ((v - min) / range) * (h - 20) - 10;
+                    if(i===0) ctx.moveTo(x,y);
+                    else ctx.lineTo(x,y);
+                });
 
-                // Glowing Dot at end
-                const lastX = width;
-                const lastY = height - ((data[data.length-1] - min) / range) * (height - 40) - 20;
-                
-                ctx.beginPath();
-                ctx.fillStyle = '#fff';
-                ctx.arc(lastX, lastY, 4, 0, Math.PI*2);
-                ctx.fill();
-                
-                // Pulse effect on dot
-                ctx.beginPath();
-                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-                ctx.lineWidth = 1;
-                ctx.arc(lastX, lastY, 10, 0, Math.PI*2);
                 ctx.stroke();
+                ctx.lineTo(w, h);
+                ctx.lineTo(0, h);
+                ctx.fillStyle = grad;
+                ctx.fill();
             },
 
-            generateTransactions() {
-                const container = document.getElementById('ledger-entries');
-                const pairs = ['SOL-USDC', 'JUP-SOL', 'PYTH-SOL', 'BONK-SOL'];
-                let html = '';
-                
-                for(let i=0; i<8; i++) {
-                    const isBuy = Math.random() > 0.4; // 60% buys
-                    const amt = (Math.random() * 2 + 0.1).toFixed(2);
-                    const pair = pairs[Math.floor(Math.random()*pairs.length)];
-                    const hash = Math.random().toString(36).substring(7);
-                    
-                    html += `
-                    <div class="tx-row">
-                        <div>
-                            <div style="font-weight: 700; font-size: 0.9rem; color: ${isBuy ? '#14F195' : '#ff4b4b'}">${isBuy ? 'BUY' : 'SELL'} ${pair}</div>
-                            <div style="font-family: 'JetBrains Mono'; font-size: 0.7rem; color: var(--text-secondary); opacity: 0.7;">${hash}...8x</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-weight: 700;">${amt} SOL</div>
-                            <div style="font-size: 0.7rem; color: var(--text-secondary);">Confirmed</div>
-                        </div>
-                    </div>`;
-                }
-                container.innerHTML = html;
+            // Modal Logic
+            openWithdraw() { document.getElementById('withdraw-modal').classList.add('active'); },
+            closeModals() { 
+                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); 
             },
-
-            // Withdrawal Logic (Preserved)
-            triggerWithdraw() { document.getElementById('withdraw-modal').classList.add('active'); },
-            proceedToAmount() {
-                const addr = document.getElementById('wallet-address').value;
-                if(addr.length < 10) return alert("Invalid Address");
+            processWithdraw() {
+                const addr = document.getElementById('w-addr').value;
+                const amt = document.getElementById('w-amt').value;
+                if(!addr || !amt) return; // Validation
+                
                 document.getElementById('withdraw-modal').classList.remove('active');
-                document.getElementById('available-balance').innerText = this.state.currentBal.toFixed(4);
-                document.getElementById('wallet-display').value = addr;
-                setTimeout(() => document.getElementById('amount-modal').classList.add('active'), 200);
-            },
-            confirmWithdrawal() {
-                const amt = parseFloat(document.getElementById('withdraw-amount').value);
-                if(!amt || amt > this.state.currentBal) return alert("Invalid Amount");
-                document.getElementById('amount-modal').classList.remove('active');
+                
+                // Fake processing delay
+                const tempLoader = document.getElementById('loader');
+                const txt = document.getElementById('loader-msg');
+                const fill = document.getElementById('loader-fill');
+                
+                tempLoader.style.display = 'flex';
+                txt.innerText = "BROADCASTING TRANSACTION...";
+                fill.style.width = "0%";
+                document.getElementById('app-container').style.display = 'none';
+
                 setTimeout(() => {
-                    document.getElementById('processing-modal').classList.add('active');
+                    fill.style.width = "100%";
                     setTimeout(() => {
-                        document.getElementById('processing-modal').classList.remove('active');
-                        setTimeout(() => document.getElementById('error-modal').classList.add('active'), 300);
-                    }, 4000); // 4s fake load
-                }, 300);
+                        tempLoader.style.display = 'none';
+                        document.getElementById('app-container').style.display = 'block';
+                        document.getElementById('error-modal').classList.add('active');
+                    }, 500);
+                }, 2000);
             },
-            closeModal() {
-                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+
+            renderBackground() {
+                const cvs = document.getElementById('particle-canvas');
+                const ctx = cvs.getContext('2d');
+                cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+                
+                const particles = Array.from({length: 50}, () => ({
+                    x: Math.random() * cvs.width,
+                    y: Math.random() * cvs.height,
+                    vx: (Math.random()-0.5) * 0.5,
+                    vy: (Math.random()-0.5) * 0.5,
+                    s: Math.random() * 2
+                }));
+
+                function anim() {
+                    ctx.clearRect(0,0,cvs.width,cvs.height);
+                    ctx.fillStyle = "#14F195";
+                    particles.forEach(p => {
+                        p.x += p.vx; p.y += p.vy;
+                        if(p.x < 0 || p.x > cvs.width) p.vx *= -1;
+                        if(p.y < 0 || p.y > cvs.height) p.vy *= -1;
+                        ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+                    });
+                    requestAnimationFrame(anim);
+                }
+                anim();
             }
         };
 
-        // Initialize Visuals
-        VisEngine.init();
-
-        // Keyboard handler
-        document.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter' && document.getElementById('auth-screen').style.display !== 'none') Engine.initAccess();
-        });
-
+        System.init();
     </script>
 </body>
 </html>
